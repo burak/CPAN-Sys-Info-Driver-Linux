@@ -1,0 +1,6 @@
+Revision history for Perl extension Sys::Info::.
+
+Time zone is GMT+2.
+
+0.69_01 Sat Jan 17 22:22:05 2009
+    => Separation from Sys::Info.

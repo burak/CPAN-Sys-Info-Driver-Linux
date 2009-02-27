@@ -1,0 +1,15 @@
+#!/usr/bin/perl -w
+use strict;
+use vars qw(%PREREQ %RECOMMEND);
+
+%PREREQ = (
+   'IO::File'            => 0,
+   'Test::More'          => '0.40',
+   'Linux::Distribution' => 0,
+   'Unix::Processors'    => 0,
+   'Sys::Info::Base'     => '0.69_01',
+);
+
+1;
+
+__END__

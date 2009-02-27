@@ -1,0 +1,14 @@
+lib/Sys/Info/Driver/Linux.pm
+lib/Sys/Info/Driver/Linux/Device.pm
+lib/Sys/Info/Driver/Linux/OS.pm
+lib/Sys/Info/Driver/Linux/Device/CPU.pm
+t/01-pod.t
+t/02-pod-coverage.t
+t/03-basic.t
+Makefile.PL
+Build.PL
+Changes
+MANIFEST
+README
+PREREQ
+META.yml
