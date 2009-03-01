@@ -1,3 +1,5 @@
+die "OS unsupported\n" if $^O !~ m{linux}xmsi;
+
 use strict;
 use vars qw(%PREREQ %RECOMMEND);
 
