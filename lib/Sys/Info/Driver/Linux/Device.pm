@@ -2,7 +2,7 @@ package Sys::Info::Driver::Linux::Device;
 use strict;
 use vars qw( $VERSION );
 
-$VERSION = '0.60';
+$VERSION = '0.69_01';
 
 1;
 
@@ -30,7 +30,7 @@ Burak Gürsoy, E<lt>burakE<64>cpan.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2006-2008 Burak Gürsoy. All rights reserved.
+Copyright 2006-2009 Burak Gürsoy. All rights reserved.
 
 =head1 LICENSE
 

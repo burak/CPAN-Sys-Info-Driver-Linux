@@ -1,6 +1,6 @@
-Revision history for Perl extension Sys::Info::.
+Revision history for Perl extension Sys::Info::Driver::Linux.
 
 Time zone is GMT+2.
 
-0.69_01 Sat Jan 17 22:22:05 2009
+0.69_01 Thu Mar  5 04:01:14 2009
     => Separation from Sys::Info.
