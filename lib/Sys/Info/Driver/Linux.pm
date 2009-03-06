@@ -3,7 +3,7 @@ use strict;
 use vars qw( $VERSION @ISA @EXPORT );
 use Exporter ();
 
-$VERSION = '0.69_01';
+$VERSION = '0.69_02';
 @ISA     = qw( Exporter );
 @EXPORT  = qw( proc );
 
