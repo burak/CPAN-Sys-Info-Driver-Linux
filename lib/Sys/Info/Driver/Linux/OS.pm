@@ -27,6 +27,19 @@ my $EDITION   = {
         '8.04' => 'Hardy Heron',
         '8.10' => 'Intrepid Ibex',
     },
+    debian => {
+        '1.1' => 'buzz',
+        '1.2' => 'rex',
+        '1.3' => 'bo',
+        '2.0' => 'hamm',
+        '2.1' => 'slink',
+        '2.2' => 'potato',
+        '3.0' => 'woody',
+        '3.1' => 'sarge',
+        '4.0' => 'etch',
+        '5.0' => 'lenny',
+        '6.0' => 'squeeze',
+    },
 };
 
 my $MANUFACTURER = {
