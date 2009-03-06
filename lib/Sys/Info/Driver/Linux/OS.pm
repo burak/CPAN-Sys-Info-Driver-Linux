@@ -220,11 +220,11 @@ sub domain_name {
     foreach my $line ( $self->read_file( proc->{resolv} ) ) {
         chomp $line;
         if ( $line =~ m{\A domain \s+ (.*) \z}xmso ) {
-            $domain = $1;
-            last;
+            return $1;
         }
     }
-    return $domain;
+    my $sys = qx{dnsdomainname 2> /dev/null};
+    return $sys;
 }
 
 sub fs {
