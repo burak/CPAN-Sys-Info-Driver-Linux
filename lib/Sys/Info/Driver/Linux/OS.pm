@@ -252,6 +252,8 @@ sub fs {
     );
 }
 
+sub bitness {}
+
 # ------------------------[ P R I V A T E ]------------------------ #
 
 sub _parse_meminfo {
@@ -454,6 +456,8 @@ Please see L<Sys::Info::OS> for definitions of these methods and more.
 =head2 uptime
 
 =head2 version
+
+=head2 bitness
 
 =head1 SEE ALSO
 
