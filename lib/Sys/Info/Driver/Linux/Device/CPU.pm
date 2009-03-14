@@ -11,23 +11,23 @@ $VERSION = '0.69_01';
 
 sub identify {
     my $self = shift;
-    return $self->_serve_from_cache(wantarray) if $self->{CACHE};
 
-    my $raw  = $self->slurp( proc->{cpuinfo} );
+    if ( ! $self->{META_DATA} ) {
+        my $mach = (POSIX::uname)[LIN_MACHINE];
+        my $arch = $mach =~ m{ i [0-9] 86 }xmsi ? 'x86'
+                 : $mach =~ m{ ia64       }xmsi ? 'IA64'
+                 : $mach =~ m{ x86_64     }xmsi ? 'AMD-64'
+                 :                                 $mach
+                 ;
 
-    my $mach = (POSIX::uname)[LIN_MACHINE];
-    my $arch = $mach =~ m{ i [0-9] 86 }xmsi ? 'x86'
-             : $mach =~ m{ ia64       }xmsi ? 'IA64'
-             : $mach =~ m{ x86_64     }xmsi ? 'AMD-64'
-             :                                 $mach
-             ;
-
-    my @cpu;
-    foreach my $e ( split /\n\n/, $self->trim( $raw ) ) {
-        push @cpu, { $self->_parse_cpuinfo($e), architecture => $arch };
+        my @raw = split m{\n\n}xms,
+                        $self->trim( $self->slurp( proc->{cpuinfo} ) );
+        $self->{META_DATA} = [];
+        foreach my $e ( @raw ) {
+            push @{ $self->{META_DATA} },
+                  { $self->_parse_cpuinfo($e), architecture => $arch };
+        }
     }
-
-    $self->{CACHE} = [@cpu];
 
     return $self->_serve_from_cache(wantarray);
 }

@@ -2,6 +2,9 @@ Revision history for Perl extension Sys::Info::Driver::Linux.
 
 Time zone is GMT+2.
 
+0.69_05 Sat Mar 14 01:52:57 2009
+    => Fix build tools.
+
 0.69_02 Fri Mar  6 04:14:39 2009
     => Add support for more distro code names.
     => Fix domain name.
