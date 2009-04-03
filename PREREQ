@@ -2,18 +2,18 @@
 use strict;
 use vars qw(%PREREQ %RECOMMEND %BUILD_REQ);
 
+%RECOMMEND = ();
+
 %BUILD_REQ = (
    'Test::More'          => '0.40',
-   'Test::Sys::Info'     => '0.11',
+   'Test::Sys::Info'     => '0.13',
 );
 
 %PREREQ = (
    'IO::File'            => 0,
    'Linux::Distribution' => 0,
    'Unix::Processors'    => 0,
-   'Sys::Info::Base'     => '0.69_05',
+   'Sys::Info::Base'     => '0.69_10',
 );
 
 1;
-
-__END__
