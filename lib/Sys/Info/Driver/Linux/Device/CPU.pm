@@ -32,6 +32,19 @@ sub identify {
     return $self->_serve_from_cache(wantarray);
 }
 
+sub bitness {
+    my $self = shift;
+    my @cpu  = $self->identify;
+    my $flags = $cpu[0]->{flags};
+    if ( $flags ) {
+        my $lm = grep { $_ eq 'lm' } @{$flags};
+        return 64 if $lm;
+    }
+    my $arch = $cpu[0]->{architecture};
+    return 64 if $arch =~ m{64}xms;
+    return 32;
+}
+
 sub load {
     my $self  = shift;
     my $level = shift;
@@ -97,6 +110,10 @@ See identify in L<Sys::Info::Device::CPU>.
 =head2 load
 
 See load in L<Sys::Info::Device::CPU>.
+
+=head2 bitness
+
+See bitness in L<Sys::Info::Device::CPU>.
 
 =head1 SEE ALSO
 

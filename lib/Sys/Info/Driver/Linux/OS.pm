@@ -252,7 +252,12 @@ sub fs {
     );
 }
 
-sub bitness {}
+sub bitness {
+    my $self = shift;
+    require POSIX;
+    my $arch = (POSIX::uname())[LIN_MACHINE];
+    return $arch =~ m{64}xms ? 64 : 32;
+}
 
 # ------------------------[ P R I V A T E ]------------------------ #
 

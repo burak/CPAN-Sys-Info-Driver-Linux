@@ -2,6 +2,9 @@ Revision history for Perl extension Sys::Info::Driver::Linux.
 
 Time zone is GMT+2.
 
+0.69_11 Sat Apr  4 07:15:36 2009
+    => Implement bitness.
+
 0.69_10 Fri Apr  3 22:45:27 2009
     => Update test suite.
 
