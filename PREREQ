@@ -13,7 +13,7 @@ use vars qw(%PREREQ %RECOMMEND %BUILD_REQ);
    'IO::File'            => 0,
    'Linux::Distribution' => 0,
    'Unix::Processors'    => 0,
-   'Sys::Info::Base'     => '0.69_11',
+   'Sys::Info::Base'     => '0.70',
 );
 
 1;

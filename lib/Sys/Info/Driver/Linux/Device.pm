@@ -2,7 +2,7 @@ package Sys::Info::Driver::Linux::Device;
 use strict;
 use vars qw( $VERSION );
 
-$VERSION = '0.69_10';
+$VERSION = '0.70';
 
 1;
 
