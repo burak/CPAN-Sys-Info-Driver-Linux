@@ -9,4 +9,9 @@ die "OS unsupported\n" if $^O !~ m{linux}xmsi;
     build_requires => {
         'Test::Sys::Info'     => '0.15',
     },
+    meta_merge     => {
+        resources => {
+            repository => 'http://bitbucket.org/burak/cpan-sys-info-driver-linux/',
+        },
+    },
 }
