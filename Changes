@@ -2,6 +2,9 @@ Revision history for Perl extension Sys::Info::Driver::Linux.
 
 Time zone is GMT+2.
 
+0.73 Thu May 14 16:59:23 2009
+    => Add Ubuntu 9.04 to editions list.
+
 0.72 Thu Apr 23 17:32:32 2009
     => Update builder.
 
