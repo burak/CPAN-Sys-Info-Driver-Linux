@@ -5,7 +5,6 @@ use base qw(Sys::Info::Base);
 use Sys::Info::Driver::Linux;
 use Unix::Processors;
 use POSIX ();
-use Sys::Info::Constants qw( LIN_MACHINE );
 
 $VERSION = '0.70';
 
@@ -13,7 +12,7 @@ sub identify {
     my $self = shift;
 
     if ( ! $self->{META_DATA} ) {
-        my $mach = (POSIX::uname)[LIN_MACHINE];
+        my $mach = $self->uname->{machine};
         my $arch = $mach =~ m{ i [0-9] 86 }xmsi ? 'x86'
                  : $mach =~ m{ ia64       }xmsi ? 'IA64'
                  : $mach =~ m{ x86_64     }xmsi ? 'AMD-64'

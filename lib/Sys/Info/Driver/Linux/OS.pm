@@ -27,6 +27,7 @@ my $EDITION   = {
         '8.04' => 'Hardy Heron',
         '8.10' => 'Intrepid Ibex',
         '9.04' => 'Jaunty Jackalope',
+        '9.10' => 'Karmic Koala',
     },
     debian => {
         '1.1' => 'buzz',
@@ -79,6 +80,7 @@ my $EDITION   = {
         '2008.0' => '2008',
         '2008.1' => '2008 Spring',
         '2009.0' => '2009',
+        '2009.1' => '2009 Spring',
     },
 };
 
@@ -212,7 +214,7 @@ sub login_name {
     return $rv;
 }
 
-sub node_name { (POSIX::uname())[LIN_NODENAME] }
+sub node_name { shift->uname->{nodename} }
 
 sub domain_name {
     my $self = shift;
@@ -253,12 +255,7 @@ sub fs {
     );
 }
 
-sub bitness {
-    my $self = shift;
-    require POSIX;
-    my $arch = (POSIX::uname())[LIN_MACHINE];
-    return $arch =~ m{64}xms ? 64 : 32;
-}
+sub bitness { shift->uname->{machine} =~ m{64}xms ? 64 : 32 }
 
 # ------------------------[ P R I V A T E ]------------------------ #
 
