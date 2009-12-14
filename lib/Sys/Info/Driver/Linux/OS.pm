@@ -1,5 +1,6 @@
 package Sys::Info::Driver::Linux::OS;
 use strict;
+use warnings;
 use vars qw( $VERSION );
 use base qw( Sys::Info::Base );
 use POSIX ();
@@ -7,6 +8,10 @@ use Cwd;
 use Carp qw( croak );
 use Sys::Info::Driver::Linux;
 use Sys::Info::Constants qw( :linux );
+use constant PIPE         => q{|};
+use constant FSTAB_LENGTH => 6;
+
+##no critic (InputOutput::ProhibitBacktickOperators)
 
 $VERSION = '0.70';
 
@@ -111,15 +116,15 @@ my %DEBIAN_VFIX = (
     lenny  => '5.0',
 );
 
-my $EDITION_SUPPORT      = join '|', keys %{ $EDITION      };
-my $MANUFACTURER_SUPPORT = join '|', keys %{ $MANUFACTURER };
+my $EDITION_SUPPORT      = join PIPE, keys %{ $EDITION      };
+my $MANUFACTURER_SUPPORT = join PIPE, keys %{ $MANUFACTURER };
 
 # unimplemented
 sub logon_server {}
 
 sub edition {
     my $self = shift->_populate_osversion;
-    $OSVERSION{RAW}->{EDITION};
+    return $OSVERSION{RAW}->{EDITION};
 }
 
 sub tz {
@@ -165,7 +170,7 @@ sub meta {
 
     $info{system_manufacturer}       = undef;
     $info{system_model}              = undef;
-    $info{system_type}               = sprintf "%s based Computer", $arch;
+    $info{system_type}               = sprintf '%s based Computer', $arch;
 
     $info{page_file_path}            = join ', ', map { $_->{Filename} } @swaps;
 
@@ -175,14 +180,15 @@ sub meta {
 sub tick_count {
     my $self = shift;
     my $uptime = $self->slurp( proc->{uptime} ) || return 0;
-    my @uptime = split /\s+/, $uptime;
+    my @uptime = split /\s+/xms, $uptime;
     # this file has two entries. uptime is the first one. second: idle time
     return $uptime[LIN_UP_TIME];
 }
 
 sub name {
-    my $self = shift->_populate_osversion;
-    my %opt  = @_ % 2 ? () : (@_);
+    my($self, @args) = @_;
+    $self->_populate_osversion;
+    my %opt  = @args % 2 ? () : @args;
     my $id   = $opt{long} ? ($opt{edition} ? 'LONGNAME_EDITION' : 'LONGNAME')
              :              ($opt{edition} ? 'NAME_EDITION'     : 'NAME'    )
              ;
@@ -201,24 +207,23 @@ sub is_root {
     my $id   = POSIX::geteuid();
     my $gid  = POSIX::getegid();
     return 0 if $@;
-    return 0 if ! defined($id) || ! defined($gid);
+    return 0 if ! defined $id || ! defined $gid;
     return $id == 0 && $gid == 0 && $name eq 'root';
 }
 
 sub login_name {
-    my $self  = shift;
-    my %opt   = @_ % 2 ? () : (@_);
+    my($self, @args) = @_;
+    my %opt   = @args % 2 ? () : @args;
     my $login = POSIX::getlogin() || return;
     my $rv    = eval { $opt{real} ? (getpwnam $login)[LIN_REAL_NAME_FIELD] : $login };
     $rv =~ s{ [,]{3,} \z }{}xms if $opt{real};
     return $rv;
 }
 
-sub node_name { shift->uname->{nodename} }
+sub node_name { return shift->uname->{nodename} }
 
 sub domain_name {
     my $self = shift;
-    my $domain;
     # hmmmm...
     foreach my $line ( $self->read_file( proc->{resolv} ) ) {
         chomp $line;
@@ -237,48 +242,48 @@ sub fs {
     my(@fstab, @junk, $re);
     foreach my $line( $self->read_file( proc->{fstab} ) ) {
         chomp $line;
-        next if $line =~ m[^#];
-        @junk = split /\s+/, $line;
-        next if ! @junk || @junk != 6;
+        next if $line =~ m{ \A \# }xms;
+        @junk = split /\s+/xms, $line;
+        next if ! @junk || @junk != FSTAB_LENGTH;
         next if lc($junk[LIN_FS_TYPE]) eq 'swap'; # ignore swaps
         $re = $junk[LIN_MOUNT_POINT];
-        next if $self->{current_dir} !~ m{\Q$re\E}i;
+        next if $self->{current_dir} !~ m{\Q$re\E}xmsi;
         push @fstab, [ $re, $junk[LIN_FS_TYPE] ];
     }
 
-    @fstab  = sort( { $b->[0] cmp $a->[0] } @fstab ) if @fstab > 1;
+    @fstab  = reverse sort { $a->[0] cmp $b->[0] } @fstab if @fstab > 1;
     my $fstype = $fstab[0]->[1];
     my $attr   = $self->_fs_attributes( $fstype );
-    return(
+    return
         filesystem => $fstype,
         ($attr ? %{$attr} : ())
-    );
+    ;
 }
 
-sub bitness { shift->uname->{machine} =~ m{64}xms ? 64 : 32 }
+sub bitness { return shift->uname->{machine} =~ m{64}xms ? '64' : '32' }
 
 # ------------------------[ P R I V A T E ]------------------------ #
 
 sub _parse_meminfo {
     my $self = shift;
     my %mem;
-    foreach my $line ( split /\n/, $self->slurp( proc->{meminfo} ) ) {
+    foreach my $line ( split /\n/xms, $self->slurp( proc->{meminfo} ) ) {
         chomp $line;
-        my($k, $v) = split /:/, $line;
+        my($k, $v) = split /:/xms, $line;
         # units in KB
-        $mem{ $k } = (split /\s+/, $self->trim( $v ) )[0];
+        $mem{ $k } = (split /\s+/xms, $self->trim( $v ) )[0];
     }
     return %mem;
 }
 
 sub _parse_swap {
     my $self = shift;
-    my @swaps      = split /\n/, $self->slurp( proc->{swaps} );
-    my @swap_title = split /\s+/, shift( @swaps );
+    my @swaps      = split /\n/xms, $self->slurp( proc->{swaps} );
+    my @swap_title = split /\s+/xms, shift @swaps;
     my @swap_list;
     foreach my $line ( @swaps ) {
         chomp $line;
-        my @data = split /\s+/, $line;
+        my @data = split /\s+/xms, $line;
         push @swap_list,
             {
                 map { $swap_title[$_] => $data[$_] } 0..$#swap_title
@@ -291,8 +296,8 @@ sub _ip {
     my $self = shift;
     my $raw  = qx(ifconfig);
     return if not $raw;
-    my @raw = split /inet addr/, $raw;
-    if ( $raw[1] =~ m{(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})}xmso ) {
+    my @raw = split /inet addr/xms, $raw;
+    if ( $raw[1] =~ m{(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})}xms ) {
         return $1;
     }
     return;
@@ -301,7 +306,7 @@ sub _ip {
 sub _populate_osversion {
     return if %OSVERSION;
     my $self    = shift;
-    my $version = '';
+    my $version = q{};
 
     if (  -e proc->{'version'} && -f _) {
         $version =  $self->trim(
@@ -312,11 +317,11 @@ sub _populate_osversion {
                     );
     }
 
-    my($str, $build_date) = split /\#/, $version;
-    my($kernel, $distro)  = ('','');
+    my($str, $build_date) = split /\#/xms, $version;
+    my($kernel, $distro)  = (q{},q{});
     #$build_date = "1 Fri Jul 23 20:48:29 CDT 2004';";
     #$build_date = "1 SMP Mon Aug 16 09:25:06 EDT 2004";
-    $build_date = '' if not $build_date; # running since blah thingie
+    $build_date = q{} if not $build_date; # running since blah thingie
     # format: 'Linux version 1.2.3 (foo@bar.com)'
     # format: 'Linux version 1.2.3 (foo@bar.com) (gcc 1.2.3)'
     # format: 'Linux version 1.2.3 (foo@bar.com) (gcc 1.2.3 (Redhat blah blah))'
@@ -329,12 +334,12 @@ sub _populate_osversion {
         }
     }
 
-    $distro = 'Linux' if not $distro or $distro =~ m{\(gcc};
+    $distro = 'Linux' if ! $distro || $distro =~ m{\(gcc}xms;
 
     # kernel build date
     $build_date = $self->date2time($build_date) if $build_date;
-    my $build = $build_date || '';
-    $build = scalar( localtime $build ) if $build;
+    my $build = $build_date || q{};
+    $build = scalar localtime $build if $build;
 
     require Linux::Distribution;
     my $linux = Linux::Distribution->new;
@@ -355,8 +360,8 @@ sub _populate_osversion {
     }
 
     if ( ! $edition && $dv !~ m{[0-9]}xms ) {
-        if ( $dn =~ /Debian/i ) {
-            my @buf = split m{/}, $dv;
+        if ( $dn =~ /Debian/xmsi ) {
+            my @buf = split m{/}xms, $dv;
             if ( my $test = $DEBIAN_VFIX{ lc $buf[0] } ) {
                 # Debian version comes as the edition name
                 $edition = $dv;
@@ -368,8 +373,8 @@ sub _populate_osversion {
     %OSVERSION = (
         NAME             => $osname,
         NAME_EDITION     => $edition ? "$osname ($edition)" : $osname,
-        LONGNAME         => '', # will be set below
-        LONGNAME_EDITION => '', # will be set below
+        LONGNAME         => q{}, # will be set below
+        LONGNAME_EDITION => q{}, # will be set below
         VERSION  => $V,
         KERNEL   => $kernel,
         RAW      => {
@@ -379,10 +384,10 @@ sub _populate_osversion {
                     },
     );
 
-    $OSVERSION{LONGNAME}         = sprintf "%s %s (kernel: %s)",
+    $OSVERSION{LONGNAME}         = sprintf '%s %s (kernel: %s)',
                                    @OSVERSION{ qw/ NAME         VERSION / },
                                    $kernel;
-    $OSVERSION{LONGNAME_EDITION} = sprintf "%s %s (kernel: %s)",
+    $OSVERSION{LONGNAME_EDITION} = sprintf '%s %s (kernel: %s)',
                                    @OSVERSION{ qw/ NAME_EDITION VERSION / },
                                    $kernel;
     return;
@@ -391,7 +396,6 @@ sub _populate_osversion {
 sub _fs_attributes {
     my $self = shift;
     my $fs   = shift;
-    my $_PC_PATH_MAX;
 
     return {
         ext3 => {

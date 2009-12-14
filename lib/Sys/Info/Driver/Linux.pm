@@ -1,13 +1,13 @@
 package Sys::Info::Driver::Linux;
 use strict;
+use warnings;
 use vars qw( $VERSION @ISA @EXPORT );
-use Exporter ();
+use base qw( Exporter );
 
 $VERSION = '0.73';
-@ISA     = qw( Exporter );
 @EXPORT  = qw( proc );
 
-use constant proc => {
+use constant proc => { ## no critic (NamingConventions::Capitalization)
     loadavg  => '/proc/loadavg', # average cpu load
     cpuinfo  => '/proc/cpuinfo', # cpu information
     uptime   => '/proc/uptime',  # uptime file

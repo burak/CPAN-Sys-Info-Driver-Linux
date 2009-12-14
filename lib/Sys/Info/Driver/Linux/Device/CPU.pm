@@ -1,10 +1,12 @@
 package Sys::Info::Driver::Linux::Device::CPU;
 use strict;
+use warnings;
 use vars qw($VERSION);
 use base qw(Sys::Info::Base);
 use Sys::Info::Driver::Linux;
 use Unix::Processors;
 use POSIX ();
+use Carp qw( croak );
 
 $VERSION = '0.70';
 
@@ -37,39 +39,37 @@ sub bitness {
     my $flags = $cpu[0]->{flags};
     if ( $flags ) {
         my $lm = grep { $_ eq 'lm' } @{$flags};
-        return 64 if $lm;
+        return '64' if $lm;
     }
-    my $arch = $cpu[0]->{architecture};
-    return 64 if $arch =~ m{64}xms;
-    return 32;
+    return $cpu[0]->{architecture} =~ m{64}xms ? '64' : '32';
 }
 
 sub load {
     my $self  = shift;
     my $level = shift;
-    my @loads = split /\s+/, $self->slurp( proc->{loadavg} );
+    my @loads = split /\s+/xms, $self->slurp( proc->{loadavg} );
     return $loads[$level];
 }
 
 sub _parse_cpuinfo {
     my $self = shift;
-    my $raw  = shift || die "Parser called without data";
+    my $raw  = shift || croak 'Parser called without data';
     my($k, $v);
     my %cpu;
-    foreach my $line (split /\n/, $raw) {
-        ($k, $v) = split /\s+:\s+/, $line;
+    foreach my $line (split /\n/xms, $raw) {
+        ($k, $v) = split /\s+:\s+/xms, $line;
         $cpu{$k} = $v;
     }
 
-    my @flags = split /\s+/, $cpu{flags};
+    my @flags = split /\s+/xms, $cpu{flags};
     my %flags = map { $_ => 1 } @flags;
     my $up    = Unix::Processors->new;
     (my $name  = $cpu{'model name'}) =~ s[ \s{2,} ][ ]xms;
 
     return(
         processor_id                 => $cpu{processor},
-        data_width                   => $flags{lm} ? 64 : 32, # guess
-        address_width                => $flags{lm} ? 64 : 32, # guess
+        data_width                   => $flags{lm} ? '64' : '32', # guess
+        address_width                => $flags{lm} ? '64' : '32', # guess
         bus_speed                    => undef,
         speed                        => $cpu{'cpu MHz'},
         name                         => $name,
