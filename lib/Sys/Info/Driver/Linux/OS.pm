@@ -8,7 +8,6 @@ use Cwd;
 use Carp qw( croak );
 use Sys::Info::Driver::Linux;
 use Sys::Info::Constants qw( :linux );
-use constant PIPE         => q{|};
 use constant FSTAB_LENGTH => 6;
 
 ##no critic (InputOutput::ProhibitBacktickOperators)
@@ -16,108 +15,6 @@ use constant FSTAB_LENGTH => 6;
 $VERSION = '0.70';
 
 my %OSVERSION; # cache
-
-my %DISTROFIX = qw( suse SUSE );
-
-my $EDITION   = {
-    # taken from wikipedia
-    ubuntu => {
-        '4.10' => 'Warty Warthog',
-        '5.04' => 'Hoary Hedgehog',
-        '5.10' => 'Breezy Badger',
-        '6.06' => 'Dapper Drake',
-        '6.10' => 'Edgy Eft',
-        '7.04' => 'Feisty Fawn',
-        '7.10' => 'Gutsy Gibbon',
-        '8.04' => 'Hardy Heron',
-        '8.10' => 'Intrepid Ibex',
-        '9.04' => 'Jaunty Jackalope',
-        '9.10' => 'Karmic Koala',
-    },
-    debian => {
-        '1.1' => 'buzz',
-        '1.2' => 'rex',
-        '1.3' => 'bo',
-        '2.0' => 'hamm',
-        '2.1' => 'slink',
-        '2.2' => 'potato',
-        '3.0' => 'woody',
-        '3.1' => 'sarge',
-        '4.0' => 'etch',
-        '5.0' => 'lenny',
-        '6.0' => 'squeeze',
-    },
-    fedora => {
-         '1' => 'Yarrow',
-         '2' => 'Tettnang',
-         '3' => 'Heidelberg',
-         '4' => 'Stentz',
-         '5' => 'Bordeaux',
-         '6' => 'Zod',
-         '7' => 'Moonshine',
-         '8' => 'Werewolf',
-         '9' => 'Sulphur',
-        '10' => 'Cambridge',
-        '11' => 'Leonidas',
-    },
-    mandriva => {
-           '5.1' => 'Venice',
-           '5.2' => 'Leeloo',
-           '5.3' => 'Festen',
-           '6.0' => 'Venus',
-           '6.1' => 'Helios',
-           '7.0' => 'Air',
-           '7.1' => 'Helium',
-           '7.2' => 'Odyssey',
-           '8.0' => 'Traktopel',
-           '8.1' => 'Vitamin',
-           '8.2' => 'Bluebird',
-           '9.0' => 'Dolphin',
-           '9.1' => 'Bamboo',
-           '9.2' => 'FiveStar',
-          '10.0' => 'Community',
-          '10.1' => 'Community',
-          '10.1' => 'Official',
-          '10.2' => 'Limited Edition 2005',
-        '2006.0' => '2006',
-        '2007'   => '2007',
-        '2007.1' => '2007 Spring',
-        '2008.0' => '2008',
-        '2008.1' => '2008 Spring',
-        '2009.0' => '2009',
-        '2009.1' => '2009 Spring',
-    },
-};
-
-my $MANUFACTURER = {
-    # taken from wikipedia
-    ubuntu    => 'Canonical Ltd. / Ubuntu Foundation',
-    centos    => 'Lance Davis',
-    fedora    => 'Fedora Project',
-    debian    => 'Debian Project',
-    mandriva  => 'Mandriva',
-    knoppix   => 'Klaus Knopper',
-    gentoo    => 'Gentoo Foundation',
-    suse      => 'Novell',
-    slackware => 'Patrick Volkerding',
-};
-
-my %DEBIAN_VFIX = (
-    # we get the version as "lenny/sid" for example
-    buzz   => '1.1',
-    rex    => '1.2',
-    bo     => '1.3',
-    hamm   => '2.0',
-    slink  => '2.1',
-    potato => '2.2',
-    woody  => '3.0',
-    sarge  => '3.1',
-    etch   => '4.0',
-    lenny  => '5.0',
-);
-
-my $EDITION_SUPPORT      = join PIPE, keys %{ $EDITION      };
-my $MANUFACTURER_SUPPORT = join PIPE, keys %{ $MANUFACTURER };
 
 # unimplemented
 sub logon_server {}
@@ -138,10 +35,6 @@ sub meta {
     my $self = shift;
     $self->_populate_osversion();
 
-    my $manufacturer = $OSVERSION{NAME} =~ m{ ($MANUFACTURER_SUPPORT) }xmsi
-                     ? $MANUFACTURER->{ lc $1 }
-                     : undef;
-
     require POSIX;
     require Sys::Info::Device;
 
@@ -151,7 +44,7 @@ sub meta {
     my @swaps = $self->_parse_swap;
     my %info;
 
-    $info{manufacturer}              = $manufacturer;
+    $info{manufacturer}              = $OSVERSION{MANUFACTURER};
     $info{build_type}                = undef;
     $info{owner}                     = undef;
     $info{organization}              = undef;
@@ -297,6 +190,7 @@ sub _ip {
     my $raw  = qx(ifconfig);
     return if not $raw;
     my @raw = split /inet addr/xms, $raw;
+    return if ! @raw || @raw < 2 || ! $raw[1];
     if ( $raw[1] =~ m{(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})}xms ) {
         return $1;
     }
@@ -305,72 +199,17 @@ sub _ip {
 
 sub _populate_osversion {
     return if %OSVERSION;
-    my $self    = shift;
-    my $version = q{};
+    my $self = shift;
+    require Sys::Info::Driver::Linux::OS::Distribution;
+    my $distro     = Sys::Info::Driver::Linux::OS::Distribution->new;
+    my $osname     = $distro->name;
+    my $V          = $distro->version;
+    my $edition    = $distro->edition;
+    my $kernel     = $distro->kernel;
+    my $build      = $distro->build;
+    my $build_date = $distro->build_date;
 
-    if (  -e proc->{'version'} && -f _) {
-        $version =  $self->trim(
-                        $self->slurp(
-                            proc->{'version'},
-                            'I can not open linux version file %s for reading: '
-                        )
-                    );
-    }
-
-    my($str, $build_date) = split /\#/xms, $version;
-    my($kernel, $distro)  = (q{},q{});
-    #$build_date = "1 Fri Jul 23 20:48:29 CDT 2004';";
-    #$build_date = "1 SMP Mon Aug 16 09:25:06 EDT 2004";
-    $build_date = q{} if not $build_date; # running since blah thingie
-    # format: 'Linux version 1.2.3 (foo@bar.com)'
-    # format: 'Linux version 1.2.3 (foo@bar.com) (gcc 1.2.3)'
-    # format: 'Linux version 1.2.3 (foo@bar.com) (gcc 1.2.3 (Redhat blah blah))'
-    if ( $str =~ LIN_RE_LINUX_VERSION ) {
-        $kernel = $1;
-        if ( $distro = $self->trim( $2 ) ) {
-            if ( $distro =~ m{ \s\((.+?)\)\) \z }xms ) {
-                $distro = $1;
-            }
-        }
-    }
-
-    $distro = 'Linux' if ! $distro || $distro =~ m{\(gcc}xms;
-
-    # kernel build date
-    $build_date = $self->date2time($build_date) if $build_date;
-    my $build = $build_date || q{};
-    $build = scalar localtime $build if $build;
-
-    require Linux::Distribution;
-    my $linux = Linux::Distribution->new;
-    my($dn, $dv);
-    if ( $dn = $linux->distribution_name ) {
-        $dn  = $DISTROFIX{$dn} || ucfirst $dn;
-        $dn .= ' Linux';
-        $dv  = $linux->distribution_version;
-    }
-
-    my $V      = $dv || $kernel;
-    my $osname = $dn || $distro;
-
-    my $edition;
-    if ( $osname =~ m{ ($EDITION_SUPPORT) }xmsi ) {
-        my $id = lc $1;
-        $edition = $EDITION->{ $id }{ $V };
-    }
-
-    if ( ! $edition && $dv !~ m{[0-9]}xms ) {
-        if ( $dn =~ /Debian/xmsi ) {
-            my @buf = split m{/}xms, $dv;
-            if ( my $test = $DEBIAN_VFIX{ lc $buf[0] } ) {
-                # Debian version comes as the edition name
-                $edition = $dv;
-                $V       = $dv = $test;
-            }
-        }
-    }
-
-    %OSVERSION = (
+    %OSVERSION  = (
         NAME             => $osname,
         NAME_EDITION     => $edition ? "$osname ($edition)" : $osname,
         LONGNAME         => q{}, # will be set below
@@ -382,6 +221,7 @@ sub _populate_osversion {
                         BUILD_DATE => defined $build_date ? $build_date : 0,
                         EDITION    => $edition,
                     },
+        MANUFACTURER => $distro->manufacturer,
     );
 
     $OSVERSION{LONGNAME}         = sprintf '%s %s (kernel: %s)',
