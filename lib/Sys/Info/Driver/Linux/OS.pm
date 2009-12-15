@@ -260,6 +260,24 @@ sub _fs_attributes {
 
 __END__
 
+sub _fetch_user_info {
+    my %user;
+    $user{NAME}               = POSIX::getlogin();
+    $user{REAL_USER_ID}       = POSIX::getuid();  # $< uid
+    $user{EFFECTIVE_USER_ID}  = POSIX::geteuid(); # $> effective uid
+    $user{REAL_GROUP_ID}      = POSIX::getgid();  # $( guid
+    $user{EFFECTIVE_GROUP_ID} = POSIX::getegid(); # $) effective guid
+    my %junk;
+    # quota, comment & expire are unreliable
+    @junk{qw(name  passwd  uid  gid
+             quota comment gcos dir shell expire)} = getpwnam($user{NAME});
+    $user{REAL_NAME} = defined $junk{gcos}    ? $junk{gcos}    : '';
+    $user{COMMENT}   = defined $junk{comment} ? $junk{comment} : '';
+    return %user;
+}
+
+=pod
+
 =head1 NAME
 
 Sys::Info::Driver::Linux::OS - Linux backend
@@ -312,38 +330,4 @@ L<Sys::Info>, L<Sys::Info::OS>,
 The C</proc> virtual filesystem:
 L<http://www.redhat.com/docs/manuals/linux/RHL-9-Manual/ref-guide/s1-proc-topfiles.html>.
 
-=head1 AUTHOR
-
-Burak Gürsoy, E<lt>burakE<64>cpan.orgE<gt>
-
-=head1 COPYRIGHT
-
-Copyright 2006-2009 Burak Gürsoy. All rights reserved.
-
-=head1 LICENSE
-
-This library is free software; you can redistribute it and/or modify 
-it under the same terms as Perl itself, either Perl version 5.10.0 or, 
-at your option, any later version of Perl 5 you may have available.
-
 =cut
-
-#------------------------------------------------------------------------------#
-
-sub _fetch_user_info {
-    my %user;
-    $user{NAME}               = POSIX::getlogin();
-    $user{REAL_USER_ID}       = POSIX::getuid();  # $< uid
-    $user{EFFECTIVE_USER_ID}  = POSIX::geteuid(); # $> effective uid
-    $user{REAL_GROUP_ID}      = POSIX::getgid();  # $( guid
-    $user{EFFECTIVE_GROUP_ID} = POSIX::getegid(); # $) effective guid
-    my %junk;
-    # quota, comment & expire are unreliable
-    @junk{qw(name  passwd  uid  gid
-             quota comment gcos dir shell expire)} = getpwnam($user{NAME});
-    $user{REAL_NAME} = defined $junk{gcos}    ? $junk{gcos}    : '';
-    $user{COMMENT}   = defined $junk{comment} ? $junk{comment} : '';
-    return %user;
-}
-
-
