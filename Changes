@@ -2,12 +2,13 @@ Revision history for Perl extension Sys::Info::Driver::Linux.
 
 Time zone is GMT+2.
 
-0.73 Sun Jun  7 03:15:17 2009
+0.73 Sun Jan 10 08:18:25 2010
     => Add Ubuntu 9.04 to editions list.
     => Support new uname().
     => Perl::Critic refactoring.
     => Merge Linux::Distribution as Sys::Info::Driver::Linux::OS::Distribution
        since the original is not maintained and was a fragile dependency.
+    => Fix RT#42437.
 
 0.72 Thu Apr 23 17:32:32 2009
     => Update builder.

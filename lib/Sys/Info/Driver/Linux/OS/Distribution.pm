@@ -254,7 +254,7 @@ sub _probe_edition {
         $edition = $EDITION->{ $id }{ $version };
     }
 
-    if ( ! $edition && $version !~ m{[0-9]}xms ) {
+    if ( ! $edition && $version && $version !~ m{[0-9]}xms ) {
         if ( $name =~ /Debian/xmsi ) {
             my @buf = split m{/}xms, $version;
             if ( my $test = $DEBIAN_VFIX{ lc $buf[0] } ) {
