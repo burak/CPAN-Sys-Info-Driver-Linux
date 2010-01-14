@@ -2,6 +2,9 @@ Revision history for Perl extension Sys::Info::Driver::Linux.
 
 Time zone is GMT+2.
 
+0.74 Fri Jan 15 01:48:58 2010
+    => Fix for "The stat preceding -l _ wasn't an lstat" failures.
+
 0.73 Sun Jan 10 08:18:25 2010
     => Add Ubuntu 9.04 to editions list.
     => Support new uname().

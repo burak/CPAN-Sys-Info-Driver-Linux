@@ -61,10 +61,11 @@ sub _parse_cpuinfo {
         $cpu{$k} = $v;
     }
 
-    my @flags = split /\s+/xms, $cpu{flags};
+    my @flags = $cpu{flags} ? (split /\s+/xms, $cpu{flags}) : ();
     my %flags = map { $_ => 1 } @flags;
     my $up    = Unix::Processors->new;
-    (my $name  = $cpu{'model name'}) =~ s[ \s{2,} ][ ]xms;
+    my $name  = $cpu{'model name'};
+    $name     =~ s[ \s{2,} ][ ]xms if $name;
 
     return(
         processor_id                 => $cpu{processor},
@@ -72,7 +73,7 @@ sub _parse_cpuinfo {
         address_width                => $flags{lm} ? '64' : '32', # guess
         bus_speed                    => undef,
         speed                        => $cpu{'cpu MHz'},
-        name                         => $name,
+        name                         => $name || q{},
         family                       => $cpu{'cpu family'},
         manufacturer                 => $cpu{vendor_id},
         model                        => $cpu{model},

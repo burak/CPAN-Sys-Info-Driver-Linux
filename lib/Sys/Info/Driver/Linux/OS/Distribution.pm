@@ -209,7 +209,9 @@ sub _probe_name {
 sub _probe_release {
     my($self, $r) = @_;
     foreach my $id ( keys %{ $r } ) {
-        if ( -f "/etc/$id" && !-l _ ){
+	# we can't use "-l _" here. it'll die on some systems
+	# XXX: check if -l check is really necessary
+        if ( -f "/etc/$id" && !-l "/etc/$id" ){
             $self->{'DISTRIB_ID'}   = $r->{$id};
             $self->{'release_file'} = $id;
             return $self->{'DISTRIB_ID'};
