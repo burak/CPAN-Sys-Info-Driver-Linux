@@ -3,6 +3,7 @@ lib/Sys/Info/Driver/Linux/Device.pm
 lib/Sys/Info/Driver/Linux/Device/CPU.pm
 lib/Sys/Info/Driver/Linux/OS.pm
 lib/Sys/Info/Driver/Linux/OS/Distribution.pm
+lib/Sys/Info/Driver/Linux/OS/Distribution/Conf.pm
 t/03-basic.t
 Build.PL
 Changes

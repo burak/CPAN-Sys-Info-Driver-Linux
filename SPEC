@@ -4,6 +4,7 @@ die "OS unsupported\n" if $^O !~ m{linux}xmsi;
     requires       => {
         'Unix::Processors'    => 0,
         'Sys::Info::Base'     => '0.73',
+        'Config::General'     => 0,
         ($] < 5.006 ? ( 'warnings::compat' => 0 ) : ()),
     },
     build_requires => {
