@@ -21,6 +21,8 @@ $VERSION = '0.75';
 
 <centos>
     manufacturer  = Lance Davis
+    release       = redhat-release
+    version_match = CentOS release (.*) \(
 </centos>
 
 <conectiva>

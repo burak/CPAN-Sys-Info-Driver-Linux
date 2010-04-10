@@ -2,11 +2,12 @@ Revision history for Perl extension Sys::Info::Driver::Linux.
 
 Time zone is GMT+2.
 
-0.75 Fri Apr  2 03:31:54 2010
+0.75_01 Fri Apr  2 03:31:54 2010
     => Split data parts from ::Distribution into ::Distribution::Conf
     => Several complex data structures are now converted to a simple
        configuration file (a string in the ::Conf module currently)
     => Config::General is now a dependency.
+    => CentOS patch by Tom Skrainar.
 
 0.74 Fri Jan 15 01:48:58 2010
     => Fix for "The stat preceding -l _ wasn't an lstat" failures.
