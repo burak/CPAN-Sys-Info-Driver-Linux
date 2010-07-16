@@ -14,14 +14,18 @@ use constant FSTAB_LENGTH => 6;
 
 $VERSION = '0.70';
 
-my %OSVERSION; # cache
+sub init {
+    my $self = shift;
+    $self->{OSVERSION}  = undef; # see _populate_osversion
+    $self->{FILESYSTEM} = undef; # see _populate_fs
+    return;
+}
 
 # unimplemented
 sub logon_server {}
 
 sub edition {
-    my $self = shift->_populate_osversion;
-    return $OSVERSION{RAW}->{EDITION};
+    return shift->_populate_osversion->{OSVERSION}{RAW}{EDITION};
 }
 
 sub tz {
@@ -32,8 +36,7 @@ sub tz {
 }
 
 sub meta {
-    my $self = shift;
-    $self->_populate_osversion();
+    my $self = shift->_populate_osversion;
 
     require POSIX;
     require Sys::Info::Device;
@@ -44,12 +47,12 @@ sub meta {
     my @swaps = $self->_parse_swap;
     my %info;
 
-    $info{manufacturer}              = $OSVERSION{MANUFACTURER};
+    $info{manufacturer}              = $self->{OSVERSION}{MANUFACTURER};
     $info{build_type}                = undef;
     $info{owner}                     = undef;
     $info{organization}              = undef;
     $info{product_id}                = undef;
-    $info{install_date}              = $OSVERSION{RAW}->{BUILD_DATE};
+    $info{install_date}              = $self->{OSVERSION}{RAW}{BUILD_DATE};
     $info{boot_device}               = undef;
 
     $info{physical_memory_total}     = $mem{MemTotal};
@@ -81,17 +84,14 @@ sub tick_count {
 sub name {
     my($self, @args) = @_;
     $self->_populate_osversion;
-    my %opt  = @args % 2 ? () : @args;
-    my $id   = $opt{long} ? ($opt{edition} ? 'LONGNAME_EDITION' : 'LONGNAME')
-             :              ($opt{edition} ? 'NAME_EDITION'     : 'NAME'    )
-             ;
-    return $OSVERSION{ $id };
+    my %opt  = @args % 2  ? ()         : @args;
+    my $id   = $opt{long} ? 'LONGNAME' : 'NAME';
+    return $self->{OSVERSION}{ $opt{edition} ? $id . '_EDITION' : $id };
 }
 
-
-sub version   { shift->_populate_osversion(); return $OSVERSION{VERSION}      }
-sub build     { shift->_populate_osversion(); return $OSVERSION{RAW}->{BUILD_DATE} }
-sub uptime    {                               return time - shift->tick_count }
+sub version   { return shift->_populate_osversion->{OSVERSION}{VERSION}         }
+sub build     { return shift->_populate_osversion->{OSVERSION}{RAW}{BUILD_DATE} }
+sub uptime    { return time - shift->tick_count }
 
 # user methods
 sub is_root {
@@ -198,8 +198,8 @@ sub _ip {
 }
 
 sub _populate_osversion {
-    return if %OSVERSION;
     my $self = shift;
+    return $self if $self->{OSVERSION};
     require Sys::Info::Driver::Linux::OS::Distribution;
     my $distro     = Sys::Info::Driver::Linux::OS::Distribution->new;
     my $osname     = $distro->name;
@@ -209,28 +209,26 @@ sub _populate_osversion {
     my $build      = $distro->build;
     my $build_date = $distro->build_date;
 
-    %OSVERSION  = (
+    $self->{OSVERSION} = {
         NAME             => $osname,
         NAME_EDITION     => $edition ? "$osname ($edition)" : $osname,
         LONGNAME         => q{}, # will be set below
         LONGNAME_EDITION => q{}, # will be set below
-        VERSION  => $V,
-        KERNEL   => $kernel,
-        RAW      => {
-                        BUILD      => defined $build      ? $build      : 0,
-                        BUILD_DATE => defined $build_date ? $build_date : 0,
-                        EDITION    => $edition,
-                    },
-        MANUFACTURER => $distro->manufacturer,
-    );
+        VERSION          => $V,
+        KERNEL           => $kernel,
+        MANUFACTURER     => $distro->manufacturer,
+        RAW              => {
+            BUILD      => defined $build      ? $build      : 0,
+            BUILD_DATE => defined $build_date ? $build_date : 0,
+            EDITION    => $edition,
+        },
+    };
 
-    $OSVERSION{LONGNAME}         = sprintf '%s %s (kernel: %s)',
-                                   @OSVERSION{ qw/ NAME         VERSION / },
-                                   $kernel;
-    $OSVERSION{LONGNAME_EDITION} = sprintf '%s %s (kernel: %s)',
-                                   @OSVERSION{ qw/ NAME_EDITION VERSION / },
-                                   $kernel;
-    return;
+    my $o = $self->{OSVERSION};
+    my $t = '%s %s (kernel: %s)';
+    $o->{LONGNAME}         = sprintf $t, $o->{NAME},         $o->{VERSION}, $kernel;
+    $o->{LONGNAME_EDITION} = sprintf $t, $o->{NAME_EDITION}, $o->{VERSION}, $kernel;
+    return $self;
 }
 
 sub _fs_attributes {

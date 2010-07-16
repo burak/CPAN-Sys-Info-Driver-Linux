@@ -7,10 +7,11 @@ use Carp qw( croak );
 use Sys::Info::Driver::Linux;
 use Sys::Info::Constants qw( :linux );
 use Sys::Info::Driver::Linux::OS::Distribution::Conf;
+use File::Spec;
 
 our $VERSION = '0.73';
 
-#<REMOVE>
+# XXX: <REMOVE>
 my $RELX = sub {
     my $master = shift;
     my $t = sub {
@@ -28,15 +29,15 @@ my %DERIVED_RELEASE  = $RELX->('release_derived');
 
 sub new {
     my $class = shift;
-    my $self = {
-        'DISTRIB_ID'          => q{},
-        'DISTRIB_RELEASE'     => q{},
-        'DISTRIB_CODENAME'    => q{},
-        'DISTRIB_DESCRIPTION' => q{},
-        'release_file'        => q{},
-        pattern               => q{},
-	PROBE   => undef,
-	RESULTS => undef,
+    my $self  = {
+        DISTRIB_ID          => q{},
+        DISTRIB_RELEASE     => q{},
+        DISTRIB_CODENAME    => q{},
+        DISTRIB_DESCRIPTION => q{},
+        release_file        => q{},
+        pattern             => q{},
+	PROBE               => undef,
+	RESULTS             => undef,
     };
     bless $self, $class;
     $self->_initial_probe;
@@ -60,12 +61,12 @@ sub manufacturer {
 sub _probe {
     my $self = shift;
     return $self->{RESULTS} if $self->{RESULTS};
-    $self->{RESULTS} = {};
-    $self->{RESULTS}->{name}    = $self->_probe_name;
-    $self->{RESULTS}->{raw_name} = $self->{RESULTS}->{name};
-    $self->{RESULTS}->{version} = $self->_probe_version;
+    $self->{RESULTS}           = {};
+    $self->{RESULTS}{name}     = $self->_probe_name;
+    $self->{RESULTS}{raw_name} = $self->{RESULTS}{name};
+    $self->{RESULTS}{version}  = $self->_probe_version;
     # this has to be last, since this also modifies the two above
-    $self->{RESULTS}->{edition} = $self->_probe_edition;
+    $self->{RESULTS}{edition}  = $self->_probe_edition;
     return $self->{RESULTS};
 }
 
@@ -83,9 +84,9 @@ sub _probe_release {
 	# we can't use "-l _" here. it'll die on some systems
 	# XXX: check if -l check is really necessary
         if ( -f "/etc/$id" && !-l "/etc/$id" ){
-            $self->{'DISTRIB_ID'}   = $r->{$id};
-            $self->{'release_file'} = $id;
-            return $self->{'DISTRIB_ID'};
+            $self->{DISTRIB_ID}   = $r->{ $id };
+            $self->{release_file} = $id;
+            return $self->{DISTRIB_ID};
         }
     }
     return;
@@ -95,13 +96,13 @@ sub _probe_version {
     my $self = shift;
     my $release = $self->_get_lsb_info('DISTRIB_RELEASE');
     return $release if $release;
-    if (! $self->{'DISTRIB_ID'}){
-         $self->name() or croak 'No version because no distribution';
+    if ( ! $self->{DISTRIB_ID} ){
+        croak 'No version because no distribution' if ! $self->name;
     }
-    my $slot = $CONF{ lc $self->{'DISTRIB_ID'} };
+    my $slot         = $CONF{ lc $self->{DISTRIB_ID} };
     $self->{pattern} = exists $slot->{version_match} ? $slot->{version_match} : q{};
-    $release = $self->_get_file_info();
-    $self->{'DISTRIB_RELEASE'} = $release;
+    $release         = $self->_get_file_info;
+    $self->{DISTRIB_RELEASE} = $release;
     return $release;
 }
 
@@ -144,10 +145,10 @@ sub _initial_probe {
     my $self    = shift;
     my $version = q{};
 
-    if (  -e proc->{'version'} && -f _) {
+    if (  -e proc->{version} && -f _) {
         $version =  $self->trim(
                         $self->slurp(
-                            proc->{'version'},
+                            proc->{version},
                             'I can not open linux version file %s for reading: '
                         )
                     );
@@ -155,9 +156,11 @@ sub _initial_probe {
 
     my($str, $build_date) = split /\#/xms, $version;
     my($kernel, $distro)  = (q{},q{});
+
     #$build_date = "1 Fri Jul 23 20:48:29 CDT 2004';";
     #$build_date = "1 SMP Mon Aug 16 09:25:06 EDT 2004";
     $build_date = q{} if not $build_date; # running since blah thingie
+
     # format: 'Linux version 1.2.3 (foo@bar.com)'
     # format: 'Linux version 1.2.3 (foo@bar.com) (gcc 1.2.3)'
     # format: 'Linux version 1.2.3 (foo@bar.com) (gcc 1.2.3 (Redhat blah blah))'
@@ -174,8 +177,8 @@ sub _initial_probe {
 
     # kernel build date
     $build_date = $self->date2time($build_date) if $build_date;
-    my $build = $build_date || q{};
-    $build = scalar localtime $build if $build;
+    my $build   = $build_date ? localtime $build_date : q{};
+
     $self->{PROBE} = {
 	version    => $version,
 	kernel     => $kernel,
@@ -183,6 +186,7 @@ sub _initial_probe {
 	build_date => $build_date,
 	distro     => $distro,
     };
+
     $self->_probe;
     return;
 }
@@ -190,16 +194,13 @@ sub _initial_probe {
 sub _get_lsb_info {
     my $self  = shift;
     my $field = shift || 'DISTRIB_ID';
-    my $tmp   = $self->{'release_file'};
+    my $tmp   = $self->{release_file};
 
-    if ( -r '/etc/' . STD_RELEASE ) {
-        $self->{'release_file'} = STD_RELEASE;
-        $self->{pattern} = $field . '=(.+)';
-        my $info = $self->_get_file_info();
-        if ($info){
-            $self->{$field} = $info;
-            return $info;
-        }
+    if ( -r File::Spec->catfile( '/etc', STD_RELEASE ) ) {
+        $self->{release_file} = STD_RELEASE;
+        $self->{pattern}      = $field . '=(.+)';
+        my $info = $self->_get_file_info;
+        return $self->{$field} = $info if $info;
     }
 
     $self->{release_file} = $tmp;
@@ -209,10 +210,12 @@ sub _get_lsb_info {
 
 sub _get_file_info {
     my $self = shift;
-    my $file = '/etc/' . $self->{'release_file'};
-    open my $FH, '<', $file or croak "Cannot open file: $file";
+    my $file = File::Spec->catfile( '/etc', $self->{release_file} );
+    require IO::File;
+    my $FH = IO::File->new;
+    $FH->open( $file, '<' ) || croak "Cannot open $file: $!";
     my @raw = <$FH>;
-    close $FH or croak "Can't close FH($file): $!";
+    $FH->close || croak "Can't close FH($file): $!";
     my $rv;
     foreach my $line ( @raw ){
         chomp $line;

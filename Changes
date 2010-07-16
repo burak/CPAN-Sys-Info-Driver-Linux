@@ -2,6 +2,9 @@ Revision history for Perl extension Sys::Info::Driver::Linux.
 
 Time zone is GMT+2.
 
+0.76 Sat Jul 17 01:44:28 2010
+    => Internal cleanup.
+
 0.75_01 Fri Apr  2 03:31:54 2010
     => Split data parts from ::Distribution into ::Distribution::Conf
     => Several complex data structures are now converted to a simple
