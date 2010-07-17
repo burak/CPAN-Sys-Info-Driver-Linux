@@ -300,6 +300,8 @@ Please see L<Sys::Info::OS> for definitions of these methods and more.
 
 =head2 fs
 
+=head2 init
+
 =head2 is_root
 
 =head2 login_name
