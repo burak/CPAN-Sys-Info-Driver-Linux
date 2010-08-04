@@ -2,6 +2,9 @@ Revision history for Perl extension Sys::Info::Driver::Linux.
 
 Time zone is GMT+2.
 
+0.77 Thu Aug  5 01:34:42 2010
+    => Fix Fedora version handling. Reported by Mark T. Kennedy.
+
 0.76 Sat Jul 17 01:44:28 2010
     => Internal cleanup.
 

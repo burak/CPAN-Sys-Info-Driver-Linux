@@ -64,7 +64,7 @@ $VERSION = '0.75';
 
 <fedora>
     manufacturer  = Fedora Project
-    version_match = Fedora Core release (\d+) \(
+    version_match = Fedora (?:Core )?release (\d+) \(
     release_derived = fedora-release
     <edition>
            1    = Yarrow
