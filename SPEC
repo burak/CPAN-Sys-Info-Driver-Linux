@@ -3,7 +3,7 @@ die "OS unsupported\n" if $^O !~ m{linux}xmsi;
     module_name    => 'Sys::Info::Driver::Linux',
     requires       => {
         'Unix::Processors'    => 0,
-        'Sys::Info::Base'     => '0.73',
+        'Sys::Info::Base'     => '0.78',
         'Config::General'     => 0,
         ($] < 5.006 ? ( 'warnings::compat' => 0 ) : ()),
     },
