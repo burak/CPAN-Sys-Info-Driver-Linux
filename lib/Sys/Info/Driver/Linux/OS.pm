@@ -7,7 +7,7 @@ use POSIX ();
 use Cwd;
 use Carp qw( croak );
 use Sys::Info::Driver::Linux;
-use Sys::Info::Constants qw( :linux );
+use Sys::Info::Driver::Linux::Constants qw( :all );
 use constant FSTAB_LENGTH => 6;
 
 ##no critic (InputOutput::ProhibitBacktickOperators)
@@ -78,7 +78,7 @@ sub tick_count {
     my $uptime = $self->slurp( proc->{uptime} ) || return 0;
     my @uptime = split /\s+/xms, $uptime;
     # this file has two entries. uptime is the first one. second: idle time
-    return $uptime[LIN_UP_TIME];
+    return $uptime[UP_TIME];
 }
 
 sub name {
@@ -108,7 +108,7 @@ sub login_name {
     my($self, @args) = @_;
     my %opt   = @args % 2 ? () : @args;
     my $login = POSIX::getlogin() || return;
-    my $rv    = eval { $opt{real} ? (getpwnam $login)[LIN_REAL_NAME_FIELD] : $login };
+    my $rv    = eval { $opt{real} ? (getpwnam $login)[REAL_NAME_FIELD] : $login };
     $rv =~ s{ [,]{3,} \z }{}xms if $opt{real};
     return $rv;
 }
@@ -138,10 +138,10 @@ sub fs {
         next if $line =~ m{ \A \# }xms;
         @junk = split /\s+/xms, $line;
         next if ! @junk || @junk != FSTAB_LENGTH;
-        next if lc($junk[LIN_FS_TYPE]) eq 'swap'; # ignore swaps
-        $re = $junk[LIN_MOUNT_POINT];
+        next if lc($junk[FS_TYPE]) eq 'swap'; # ignore swaps
+        $re = $junk[MOUNT_POINT];
         next if $self->{current_dir} !~ m{\Q$re\E}xmsi;
-        push @fstab, [ $re, $junk[LIN_FS_TYPE] ];
+        push @fstab, [ $re, $junk[FS_TYPE] ];
     }
 
     @fstab  = reverse sort { $a->[0] cmp $b->[0] } @fstab if @fstab > 1;
