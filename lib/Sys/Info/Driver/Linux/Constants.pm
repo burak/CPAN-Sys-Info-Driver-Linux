@@ -2,6 +2,7 @@ package Sys::Info::Driver::Linux::Constants;
 use strict;
 use warnings;
 use vars qw( $VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS );
+use base qw( Exporter );
 
 $VERSION = '0.7801';
 
