@@ -3,6 +3,6 @@ use strict;
 use warnings;
 use Test::Sys::Info;
 
-diag(qx(uname -a));
+printf STDERR "UNAME: %s\n", qx(uname -a) || 'unknown';
 
 driver_ok('Linux');

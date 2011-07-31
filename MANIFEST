@@ -1,4 +1,5 @@
 lib/Sys/Info/Driver/Linux.pm
+lib/Sys/Info/Driver/Linux/Constants.pm
 lib/Sys/Info/Driver/Linux/Device.pm
 lib/Sys/Info/Driver/Linux/Device/CPU.pm
 lib/Sys/Info/Driver/Linux/OS.pm
