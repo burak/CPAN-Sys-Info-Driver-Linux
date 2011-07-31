@@ -72,15 +72,13 @@ __END__
 
 =head1 NAME
 
-Sys::Info::Driver::Linux::Device - Base class for Linux device drivers
+Sys::Info::Driver::Linux::Constants - Constants for Linux driver
 
 =head1 SYNOPSIS
 
-    use base qw( Sys::Info::Driver::Linux::Device );
-
 =head1 DESCRIPTION
 
-Base class for Linux device drivers.
+Constants for Linux driver.
 
 =head1 METHODS
 
