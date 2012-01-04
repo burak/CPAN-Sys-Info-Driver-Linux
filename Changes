@@ -1,5 +1,8 @@
 Revision history for Perl extension Sys::Info::Driver::Linux.
 
+0.7900 Thu Jan  5 00:21:39 2012
+    => Fix RT#72586 (mcholste)
+
 0.7801 Sun Jul 31 00:10:35 2011
     => Added a diag section to unit test and some code to SPEC to disable
        nonsense smoker setups.
