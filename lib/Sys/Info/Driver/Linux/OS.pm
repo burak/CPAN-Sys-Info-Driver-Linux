@@ -201,13 +201,14 @@ sub _populate_osversion {
     my $self = shift;
     return $self if $self->{OSVERSION};
     require Sys::Info::Driver::Linux::OS::Distribution;
-    my $distro     = Sys::Info::Driver::Linux::OS::Distribution->new;
-    my $osname     = $distro->name;
-    my $V          = $distro->version;
-    my $edition    = $distro->edition;
-    my $kernel     = $distro->kernel;
-    my $build      = $distro->build;
-    my $build_date = $distro->build_date;
+    my $distro       = Sys::Info::Driver::Linux::OS::Distribution->new;
+    my $osname       = $distro->name;
+    my $V            = $distro->version;
+    my $edition      = $distro->edition;
+    my $kernel       = $distro->kernel;
+    my $build        = $distro->build;
+    my $build_date   = $distro->build_date;
+    my $manufacturer = $distro->manufacturer || q{};
 
     $self->{OSVERSION} = {
         NAME             => $osname,
@@ -216,7 +217,7 @@ sub _populate_osversion {
         LONGNAME_EDITION => q{}, # will be set below
         VERSION          => $V,
         KERNEL           => $kernel,
-        MANUFACTURER     => $distro->manufacturer,
+        MANUFACTURER     => $manufacturer,
         RAW              => {
             BUILD      => defined $build      ? $build      : 0,
             BUILD_DATE => defined $build_date ? $build_date : 0,
