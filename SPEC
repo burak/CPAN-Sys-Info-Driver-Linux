@@ -17,7 +17,6 @@ foreach my $file ( @crucial ) {
         'Unix::Processors'    => 0,
         'Sys::Info::Base'     => '0.7801',
         'Config::General'     => 0,
-        ($] < 5.006 ? ( 'warnings::compat' => 0 ) : ()),
     },
     build_requires => {
         'Test::Sys::Info'     => '0.20',
@@ -26,5 +25,10 @@ foreach my $file ( @crucial ) {
         resources => {
             repository => 'http://bitbucket.org/burak/cpan-sys-info-driver-linux/',
         },
+    },
+    BUILDER => {
+        change_versions                  => 1,
+        copyright_first_year             => 2006,
+        add_pod_author_copyright_license => 1,
     },
 }
