@@ -1,5 +1,10 @@
 Revision history for Perl extension Sys::Info::Driver::Linux.
 
+0.7901 Sun Jul 15 23:45:45 2012
+    => Workaround for the missing /etc/lsb-release and existing /etc/lsb-release.d/ (CentOS)
+    => Attach " Linux" to the name only in it  doesn't have that already (RHEL).
+    => Fix for RT#72673 and RT#77563 (RHEL)
+
 0.7900 Thu Jan  5 00:21:39 2012
     => Fix RT#72586 (mcholste)
     => Fix RT#70510 (jquelin, pjedwards)

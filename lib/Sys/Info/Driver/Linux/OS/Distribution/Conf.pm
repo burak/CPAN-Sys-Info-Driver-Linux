@@ -154,7 +154,8 @@ $VERSION = '0.75';
 </redflag>
 
 <redhat>
-    version_match = Red Hat Linux release (.*) \(
+    manufacturer  = Red Hat, Inc.
+    version_match = Red Hat (?:Enterprise )?Linux (?:Server )release (.*) \(
     release = redhat-release
     release = redhat_version
 </redhat>

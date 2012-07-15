@@ -32,13 +32,14 @@ sub new {
     my $class = shift;
     my $self  = {
         DISTRIB_ID          => q{},
+        DISTRIB_NAME        => q{}, # workround field for new distros
         DISTRIB_RELEASE     => q{},
         DISTRIB_CODENAME    => q{},
         DISTRIB_DESCRIPTION => q{},
         release_file        => q{},
         pattern             => q{},
-    PROBE               => undef,
-    RESULTS             => undef,
+        PROBE               => undef,
+        RESULTS             => undef,
     };
     bless $self, $class;
     $self->_initial_probe;
@@ -72,7 +73,7 @@ sub _probe {
 }
 
 sub _probe_name {
-    my $self = shift;
+    my $self   = shift;
     my $distro = $self->_get_lsb_info;
     return $distro if $distro;
     return $self->_probe_release( \%DERIVED_RELEASE  )
@@ -80,11 +81,9 @@ sub _probe_name {
 }
 
 sub _probe_release {
-    my($self, $r) = @_;
+    my($self, $r) = @_;;
     foreach my $id ( keys %{ $r } ) {
-    # we can't use "-l _" here. it'll die on some systems
-    # XXX: check if -l check is really necessary
-        if ( -f "/etc/$id" && !-l "/etc/$id" ){
+        if ( -f "/etc/$id" && ! -l "/etc/$id" ) {
             $self->{DISTRIB_ID}   = $r->{ $id };
             $self->{release_file} = $id;
             return $self->{DISTRIB_ID};
@@ -94,12 +93,14 @@ sub _probe_release {
 }
 
 sub _probe_version {
-    my $self = shift;
+    my $self    = shift;
     my $release = $self->_get_lsb_info('DISTRIB_RELEASE');
     return $release if $release;
-    if ( ! $self->{DISTRIB_ID} ){
-        croak 'No version because no distribution' if ! $self->name;
+
+    if ( ! $self->{DISTRIB_ID} && ! $self->name ) {
+        croak 'No version because no distribution';
     }
+
     my $slot         = $CONF{ lc $self->{DISTRIB_ID} };
     $self->{pattern} = exists $slot->{version_match} ? $slot->{version_match} : q{};
     $release         = $self->_get_file_info;
@@ -112,14 +113,17 @@ sub _probe_edition {
     my $p    = $self->{PROBE};
 
     if ( my $dn = $self->name ) {
-    my $slot = $CONF{ $dn };
-        $dn  = exists $slot->{name} ? $slot->{name} : ucfirst $dn;
-        $dn .= ' Linux';
-    $self->{RESULTS}{name}    = $dn;
+        my $n = $self->{DISTRIB_NAME} || do {
+            my $slot = $CONF{ $dn };
+            exists $slot->{name} ? $slot->{name} : ucfirst $dn;
+        };
+        $dn  = $self->trim( $n );
+        $dn .= ' Linux' if $dn !~ m{Linux}xmsi;
+        $self->{RESULTS}{name} = $dn;
     }
     else {
-    $self->{RESULTS}{name}    = $p->{distro};
-    $self->{RESULTS}{version} = $p->{kernel};
+        $self->{RESULTS}{name}    = $p->{distro};
+        $self->{RESULTS}{version} = $p->{kernel};
     }
 
     my $name     = $self->name;
@@ -129,7 +133,7 @@ sub _probe_edition {
     my $edition  = exists $slot->{edition} ? $slot->{edition}{ $version } : undef;
 
     if ( ! $edition && $version && $version !~ m{[0-9]}xms ) {
-        if ( $name =~ /debian/xmsi ) {
+        if ( $name =~ m{debian}xmsi ) {
             my @buf = split m{/}xms, $version;
             if ( my $test = $CONF{debian}->{vfix}{ lc $buf[0] } ) {
                 # Debian version comes as the edition name
@@ -201,35 +205,37 @@ sub _get_lsb_info {
         return $self->{$field} = $info if $info;
     }
     else {
-        # CentOS6+?
-        if ( $field eq 'LSB_VERSION' ) {
-            my $dir = File::Spec->catdir( '/etc', STD_RELEASE_DIR );
-            if ( -d $dir ) {
-                my $rv = map  { s{$dir/}{}xms && $_ }
-                     grep { $_ !~ m{ \A [.] }xms }
-                     glob "$dir/*";
-                return $self->{$field} = $rv if $rv;
+        # CentOS6+? RHEL? Any new distro?
+        my $dir = File::Spec->catdir( '/etc', STD_RELEASE_DIR );
+        if ( -d $dir ) {
+            my $rv = map  { s{$dir/}{}xms && $_ }
+                 grep { $_ !~ m{ \A [.] }xms }
+                 glob "$dir/*";
+            $self->{LSB_VERSION} = $rv if $rv;
+        }
+        my($release) = do {
+            my @files = glob "/etc/*release";
+            my($real) = sort grep { ! -l } @files;
+            my %uniq  = map { $self->trim( $self->slurp( $_ ) ) => 1 }
+                        @files;
+            if ( $real ) {
+                ($self->{release_file} = $real) =~ s{/etc/}{}xms;
+                $self->{pattern}       = '(.+)';
             }
-        }
-        else {
-            my($release) = do {
-                my %uniq =  map { $self->trim( $self->slurp( $_ ) ) => 1 }
-                            glob "/etc/*release";
-                keys %uniq;
-            };
-            return if ! $release; # huh?
-            my($distrib_id, @rest)  = split m{release}xms, $release, 2;
-            my($version, $codename) = split m{ \s+   }xms, $self->trim( join ' ', @rest ), 2;
-            $codename =~ s{[()]}{}xmsg;
-            my %info = (
-                DISTRIB_DESCRIPTION => $release,
-                DISTRIB_ID          => $distrib_id,
-                DISTRIB_RELEASE     => $version,
-                DISTRIB_CODENAME    => $codename,
-            );
-            my $rv = $info{ $field };
-            return $self->{ $field } = $rv if $rv;
-        }
+            keys %uniq;
+        };
+        return if ! $release; # huh?
+        my($rname) = split m{\-}xms, $self->{release_file};
+        my($distrib_id, @rest)  = split m{release}xms, $release, 2;
+        my($version, $codename) = split m{ \s+   }xms, $self->trim( join ' ', @rest ), 2;
+        $codename   =~ s{[()]}{}xmsg;
+        $distrib_id = $self->trim( $distrib_id );
+        $self->{DISTRIB_DESCRIPTION} = $release;
+        $self->{DISTRIB_ID}          = $rname || $distrib_id;
+        $self->{DISTRIB_NAME}        = $distrib_id;
+        $self->{DISTRIB_RELEASE}     = $version;
+        $self->{DISTRIB_CODENAME}    = $codename;
+        return $self->{ $field } if $self->{ $field };
     }
 
     $self->{release_file} = $tmp;
