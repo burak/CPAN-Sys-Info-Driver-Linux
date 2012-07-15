@@ -132,13 +132,23 @@ sub _probe_edition {
     my $slot     = $CONF{$raw_name} || return;
     my $edition  = exists $slot->{edition} ? $slot->{edition}{ $version } : undef;
 
-    if ( ! $edition && $version && $version !~ m{[0-9]}xms ) {
-        if ( $name =~ m{debian}xmsi ) {
-            my @buf = split m{/}xms, $version;
-            if ( my $test = $CONF{debian}->{vfix}{ lc $buf[0] } ) {
-                # Debian version comes as the edition name
-                $edition = $version;
-                $self->{RESULTS}{version} = $test;
+    if ( ! $edition ) {
+        if ( $version && $version !~ m{[0-9]}xms ) {
+            if ( $name =~ m{debian}xmsi ) {
+                my @buf = split m{/}xms, $version;
+                if ( my $test = $CONF{debian}->{vfix}{ lc $buf[0] } ) {
+                    # Debian version comes as the edition name
+                    $edition = $version;
+                    $self->{RESULTS}{version} = $test;
+                }
+            }
+        }
+        else {
+            if (   $slot->{use_codename_for_edition}
+                && $self->{DISTRIB_CODENAME}
+            ) {
+                my $cn = $self->{DISTRIB_CODENAME};
+                $edition = $cn if $cn !~ m{[0-9]}xms;
             }
         }
     }
@@ -182,11 +192,11 @@ sub _initial_probe {
     my $build   = $build_date ? localtime $build_date : q{};
 
     $self->{PROBE} = {
-    version    => $version,
-    kernel     => $kernel,
-    build      => $build,
-    build_date => $build_date,
-    distro     => $distro,
+        version    => $version,
+        kernel     => $kernel,
+        build      => $build,
+        build_date => $build_date,
+        distro     => $distro,
     };
 
     $self->_probe;

@@ -158,6 +158,7 @@ $VERSION = '0.75';
     version_match = Red Hat (?:Enterprise )?Linux (?:Server )release (.*) \(
     release = redhat-release
     release = redhat_version
+    use_codename_for_edition = 1
 </redhat>
 
 <pardus>
