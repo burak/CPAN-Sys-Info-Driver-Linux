@@ -2,6 +2,7 @@ package Sys::Info::Driver::Linux::OS::Distribution;
 use strict;
 use warnings;
 use constant STD_RELEASE => 'lsb-release';
+use constant STD_RELEASE_DIR => 'lsb-release.d';
 use base qw( Sys::Info::Base );
 use Carp qw( croak );
 use Sys::Info::Driver::Linux;
@@ -16,7 +17,7 @@ my $RELX = sub {
     my $master = shift;
     my $t = sub {
         my($k, $v) = @_;
-	return map { $_ => $v} ref $k ? @{$k} : ($k);
+    return map { $_ => $v} ref $k ? @{$k} : ($k);
     };
     map  { $t->($CONF{$_}->{$master}, $_ ) }
     grep {      $CONF{$_}->{$master}       }
@@ -36,8 +37,8 @@ sub new {
         DISTRIB_DESCRIPTION => q{},
         release_file        => q{},
         pattern             => q{},
-	PROBE               => undef,
-	RESULTS             => undef,
+    PROBE               => undef,
+    RESULTS             => undef,
     };
     bless $self, $class;
     $self->_initial_probe;
@@ -81,8 +82,8 @@ sub _probe_name {
 sub _probe_release {
     my($self, $r) = @_;
     foreach my $id ( keys %{ $r } ) {
-	# we can't use "-l _" here. it'll die on some systems
-	# XXX: check if -l check is really necessary
+    # we can't use "-l _" here. it'll die on some systems
+    # XXX: check if -l check is really necessary
         if ( -f "/etc/$id" && !-l "/etc/$id" ){
             $self->{DISTRIB_ID}   = $r->{ $id };
             $self->{release_file} = $id;
@@ -111,14 +112,14 @@ sub _probe_edition {
     my $p    = $self->{PROBE};
 
     if ( my $dn = $self->name ) {
-	my $slot = $CONF{ $dn };
+    my $slot = $CONF{ $dn };
         $dn  = exists $slot->{name} ? $slot->{name} : ucfirst $dn;
         $dn .= ' Linux';
-	$self->{RESULTS}{name}    = $dn;
+    $self->{RESULTS}{name}    = $dn;
     }
     else {
-	$self->{RESULTS}{name}    = $p->{distro};
-	$self->{RESULTS}{version} = $p->{kernel};
+    $self->{RESULTS}{name}    = $p->{distro};
+    $self->{RESULTS}{version} = $p->{kernel};
     }
 
     my $name     = $self->name;
@@ -177,11 +178,11 @@ sub _initial_probe {
     my $build   = $build_date ? localtime $build_date : q{};
 
     $self->{PROBE} = {
-	version    => $version,
-	kernel     => $kernel,
-	build      => $build,
-	build_date => $build_date,
-	distro     => $distro,
+    version    => $version,
+    kernel     => $kernel,
+    build      => $build,
+    build_date => $build_date,
+    distro     => $distro,
     };
 
     $self->_probe;
@@ -198,6 +199,37 @@ sub _get_lsb_info {
         $self->{pattern}      = $field . '=(.+)';
         my $info = $self->_get_file_info;
         return $self->{$field} = $info if $info;
+    }
+    else {
+        # CentOS6+?
+        if ( $field eq 'LSB_VERSION' ) {
+            my $dir = File::Spec->catdir( '/etc', STD_RELEASE_DIR );
+            if ( -d $dir ) {
+                my $rv = map  { s{$dir/}{}xms && $_ }
+                     grep { $_ !~ m{ \A [.] }xms }
+                     glob "$dir/*";
+                return $self->{$field} = $rv if $rv;
+            }
+        }
+        else {
+            my($release) = do {
+                my %uniq =  map { $self->trim( $self->slurp( $_ ) ) => 1 }
+                            glob "/etc/*release";
+                keys %uniq;
+            };
+            return if ! $release; # huh?
+            my($distrib_id, @rest)  = split m{release}xms, $release, 2;
+            my($version, $codename) = split m{ \s+   }xms, $self->trim( join ' ', @rest ), 2;
+            $codename =~ s{[()]}{}xmsg;
+            my %info = (
+                DISTRIB_DESCRIPTION => $release,
+                DISTRIB_ID          => $distrib_id,
+                DISTRIB_RELEASE     => $version,
+                DISTRIB_CODENAME    => $codename,
+            );
+            my $rv = $info{ $field };
+            return $self->{ $field } = $rv if $rv;
+        }
     }
 
     $self->{release_file} = $tmp;
@@ -216,12 +248,12 @@ sub _get_file_info {
     my $rv;
     foreach my $line ( @raw ){
         chomp $line;
-	## no critic (RequireExtendedFormatting)
+        ## no critic (RequireExtendedFormatting)
         my($info) = $line =~ m/$self->{pattern}/ms;
         if ( $info ) {
-	    $rv = "\L$info";
-	    last;
-	}
+            $rv = "\L$info";
+            last;
+        }
     }
     return $rv;
 }
