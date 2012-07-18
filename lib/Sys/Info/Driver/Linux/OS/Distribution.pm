@@ -81,7 +81,7 @@ sub _probe_name {
 }
 
 sub _probe_release {
-    my($self, $r) = @_;;
+    my($self, $r) = @_;
     foreach my $id ( keys %{ $r } ) {
         if ( -f "/etc/$id" && ! -l "/etc/$id" ) {
             $self->{DISTRIB_ID}   = $r->{ $id };
@@ -218,9 +218,10 @@ sub _get_lsb_info {
         # CentOS6+? RHEL? Any new distro?
         my $dir = File::Spec->catdir( '/etc', STD_RELEASE_DIR );
         if ( -d $dir ) {
-            my $rv = map  { s{$dir/}{}xms && $_ }
-                 grep { $_ !~ m{ \A [.] }xms }
-                 glob "$dir/*";
+            my $rv = join q{: },
+                     map  { m{$dir/(.*)}xms ? $1 : () }
+                     grep { $_ !~ m{ \A [.] }xms }
+                     glob "$dir/*";
             $self->{LSB_VERSION} = $rv if $rv;
         }
         my($release) = do {
@@ -245,6 +246,16 @@ sub _get_lsb_info {
         $self->{DISTRIB_NAME}        = $distrib_id;
         $self->{DISTRIB_RELEASE}     = $version;
         $self->{DISTRIB_CODENAME}    = $codename;
+
+        # fix stupidity
+        if (   $self->{DISTRIB_ID}
+            && $self->{DISTRIB_ID} eq 'redhat'
+            && $self->{DISTRIB_NAME}
+            && index($self->{DISTRIB_NAME}, 'CentOS') != -1
+        ) {
+            $self->{DISTRIB_ID} = 'centos';
+        }
+
         return $self->{ $field } if $self->{ $field };
     }
 
