@@ -1,8 +1,9 @@
 package Sys::Info::Driver::Linux::OS::Distribution;
 use strict;
 use warnings;
-use constant STD_RELEASE => 'lsb-release';
+use constant STD_RELEASE     => 'lsb-release';
 use constant STD_RELEASE_DIR => 'lsb-release.d';
+use constant STD_ETC_DIR     => '/etc';
 use base qw( Sys::Info::Base );
 use Carp qw( croak );
 use Sys::Info::Driver::Linux;
@@ -30,6 +31,12 @@ my %DERIVED_RELEASE  = $RELX->('release_derived');
 
 sub new {
     my $class = shift;
+    my %option;
+    if ( @_ ) {
+        die "Parameters must be in name => value format" if @_ % 2;
+        %option = @_;
+    }
+
     my $self  = {
         DISTRIB_ID          => q{},
         DISTRIB_NAME        => q{}, # workround field for new distros
@@ -40,7 +47,12 @@ sub new {
         pattern             => q{},
         PROBE               => undef,
         RESULTS             => undef,
+        etc_dir             => STD_ETC_DIR,
+        %option,
     };
+
+    $self->{etc_dir} =~ s{[/]+$}{}xms;
+
     bless $self, $class;
     $self->_initial_probe;
     return $self;
@@ -82,13 +94,16 @@ sub _probe_name {
 
 sub _probe_release {
     my($self, $r) = @_;
+
     foreach my $id ( keys %{ $r } ) {
-        if ( -f "/etc/$id" && ! -l "/etc/$id" ) {
+        my $file = File::Spec->catfile( $self->{etc_dir}, $id );
+        if ( -f $file && ! -l $file ) {
             $self->{DISTRIB_ID}   = $r->{ $id };
             $self->{release_file} = $id;
             return $self->{DISTRIB_ID};
         }
     }
+
     return;
 }
 
@@ -208,7 +223,7 @@ sub _get_lsb_info {
     my $field = shift || 'DISTRIB_ID';
     my $tmp   = $self->{release_file};
 
-    if ( -r File::Spec->catfile( '/etc', STD_RELEASE ) ) {
+    if ( -r File::Spec->catfile( $self->{etc_dir}, STD_RELEASE ) ) {
         $self->{release_file} = STD_RELEASE;
         $self->{pattern}      = $field . '=(.+)';
         my $info = $self->_get_file_info;
@@ -216,7 +231,7 @@ sub _get_lsb_info {
     }
     else {
         # CentOS6+? RHEL? Any new distro?
-        my $dir = File::Spec->catdir( '/etc', STD_RELEASE_DIR );
+        my $dir = File::Spec->catdir( $self->{etc_dir}, STD_RELEASE_DIR );
         if ( -d $dir ) {
             my $rv = join q{: },
                      map  { m{$dir/(.*)}xms ? $1 : () }
@@ -225,15 +240,17 @@ sub _get_lsb_info {
             $self->{LSB_VERSION} = $rv if $rv;
         }
         my($release) = do {
-            my @files = glob "/etc/*release";
-            my($real) = sort grep { ! -l } @files;
-            my %uniq  = map { $self->trim( $self->slurp( $_ ) ) => 1 }
-                        @files;
-            if ( $real ) {
-                ($self->{release_file} = $real) =~ s{/etc/}{}xms;
-                $self->{pattern}       = '(.+)';
+            if ( my @files = glob $self->{etc_dir} . "/*release" ) {
+                my($real) = sort grep { ! -l } @files;
+                my %uniq  = map { $self->trim( $self->slurp( $_ ) ) => 1 }
+                            @files;
+                if ( $real ) {
+                    my $etc = $self->{etc_dir};
+                    ($self->{release_file} = $real) =~ s{$etc/}{}xms;
+                    $self->{pattern}       = '(.+)';
+                }
+                keys %uniq;
             }
-            keys %uniq;
         };
         return if ! $release; # huh?
         my($rname) = split m{\-}xms, $self->{release_file};
@@ -266,7 +283,7 @@ sub _get_lsb_info {
 
 sub _get_file_info {
     my $self = shift;
-    my $file = File::Spec->catfile( '/etc', $self->{release_file} );
+    my $file = File::Spec->catfile( $self->{etc_dir}, $self->{release_file} );
     require IO::File;
     my $FH = IO::File->new;
     $FH->open( $file, '<' ) || croak "Cannot open $file: $!";
