@@ -3,14 +3,19 @@ use strict;
 use warnings;
 use Carp       qw( croak   );
 use Test::More qw( no_plan );
+use Data::Dumper;
 
-BEGIN {
-    use_ok('Sys::Info::Driver::Linux::OS::Distribution');
-};
+use Sys::Info::Driver::Linux::OS::Distribution;
 
 ok( my $distro  = Sys::Info::Driver::Linux::OS::Distribution->new, 'Got the object' );
 ok( my $name    = $distro->name,    'Got a name'    );
 ok( my $version = $distro->version, 'Got a version' );
+
+diag Dumper {
+    distro  => $distro,
+    name    => $name,
+    version => $version,
+};
 
 dump_if_exists( '/etc/lsb-release' );
 

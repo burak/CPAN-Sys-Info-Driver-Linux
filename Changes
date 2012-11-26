@@ -1,5 +1,9 @@
 Revision history for Perl extension Sys::Info::Driver::Linux.
 
+0.7902 Mon Nov 26 04:08:14 2012
+    => Use full path to ifconfig.
+    => Fixes for ::Distribution
+
 0.7901 Sun Jul 15 23:45:45 2012
     => Workaround for the missing /etc/lsb-release and existing /etc/lsb-release.d/ (CentOS)
     => Attach " Linux" to the name only if it doesn't have that already (RHEL).

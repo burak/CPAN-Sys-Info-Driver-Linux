@@ -4,6 +4,7 @@ use warnings;
 use constant STD_RELEASE     => 'lsb-release';
 use constant STD_RELEASE_DIR => 'lsb-release.d';
 use constant STD_ETC_DIR     => '/etc';
+
 use base qw( Sys::Info::Base );
 use Carp qw( croak );
 use Sys::Info::Driver::Linux;
@@ -252,17 +253,19 @@ sub _get_lsb_info {
                 keys %uniq;
             }
         };
+
         return if ! $release; # huh?
+
         my($rname) = split m{\-}xms, $self->{release_file};
         my($distrib_id, @rest)  = split m{release}xms, $release, 2;
         my($version, $codename) = split m{ \s+   }xms, $self->trim( join ' ', @rest ), 2;
-        $codename   =~ s{[()]}{}xmsg;
+        $codename   =~ s{[()]}{}xmsg if $codename;
         $distrib_id = $self->trim( $distrib_id );
         $self->{DISTRIB_DESCRIPTION} = $release;
         $self->{DISTRIB_ID}          = $rname || $distrib_id;
         $self->{DISTRIB_NAME}        = $distrib_id;
         $self->{DISTRIB_RELEASE}     = $version;
-        $self->{DISTRIB_CODENAME}    = $codename;
+        $self->{DISTRIB_CODENAME}    = $codename || q{};
 
         # fix stupidity
         if (   $self->{DISTRIB_ID}

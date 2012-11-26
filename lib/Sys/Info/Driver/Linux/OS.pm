@@ -187,7 +187,9 @@ sub _parse_swap {
 
 sub _ip {
     my $self = shift;
-    my $raw  = qx(ifconfig);
+    my $cmd  = q{/sbin/ifconfig};
+    return if ! -e $cmd || ! -x _;
+    my $raw = qx($cmd);
     return if not $raw;
     my @raw = split /inet addr/xms, $raw;
     return if ! @raw || @raw < 2 || ! $raw[1];
