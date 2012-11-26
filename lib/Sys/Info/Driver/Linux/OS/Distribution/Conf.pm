@@ -211,6 +211,8 @@ $VERSION = '0.75';
           11.04 = Natty Narwhal
           11.10 = Oneiric Ocelot
           12.04 = Precise Pangolin
+          12.10	= Quantal Quetzal
+          13.04	= Raring Ringtail
     </edition>
 </ubuntu>
 
