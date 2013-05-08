@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use constant STD_RELEASE     => 'lsb-release';
 use constant STD_RELEASE_DIR => 'lsb-release.d';
+use constant DEBIAN_RELEASE  => 'os-release';
 use constant STD_ETC_DIR     => '/etc';
 
 use base qw( Sys::Info::Base );
@@ -224,8 +225,16 @@ sub _get_lsb_info {
     my $field = shift || 'DISTRIB_ID';
     my $tmp   = $self->{release_file};
 
-    if ( -r File::Spec->catfile( $self->{etc_dir}, STD_RELEASE ) ) {
-        $self->{release_file} = STD_RELEASE;
+    my($rfile) = grep { -r $_->[1] }
+                map  {
+                    [ $_ => File::Spec->catfile( $self->{etc_dir}, $_ ) ]
+                }
+                STD_RELEASE,
+                DEBIAN_RELEASE
+                ;
+
+    if ( $rfile ) {
+        $self->{release_file} = $rfile->[0];
         $self->{pattern}      = $field . '=(.+)';
         my $info = $self->_get_file_info;
         return $self->{$field} = $info if $info;
@@ -289,7 +298,7 @@ sub _get_file_info {
     my $file = File::Spec->catfile( $self->{etc_dir}, $self->{release_file} );
     require IO::File;
     my $FH = IO::File->new;
-    $FH->open( $file, '<' ) || croak "Cannot open $file: $!";
+    $FH->open( $file, '<' ) || croak "Can't open $file: $!";
     my @raw = <$FH>;
     $FH->close || croak "Can't close FH($file): $!";
     my $rv;
