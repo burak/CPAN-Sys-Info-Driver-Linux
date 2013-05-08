@@ -4,7 +4,7 @@ use warnings;
 use vars qw( $VERSION @ISA @EXPORT );
 use base qw( Exporter );
 
-$VERSION = '0.7902';
+$VERSION = '0.7903';
 @EXPORT  = qw( proc );
 
 use constant proc => { ## no critic (NamingConventions::Capitalization)

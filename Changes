@@ -1,5 +1,8 @@
 Revision history for Perl extension Sys::Info::Driver::Linux.
 
+0.7902 Wed May  8 04:47:19 2013
+    => Fix for Debian.
+
 0.7902 Mon Nov 26 04:08:14 2012
     => Use full path to ifconfig.
     => Fixes for ::Distribution
