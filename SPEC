@@ -23,7 +23,7 @@ foreach my $file ( @crucial ) {
     },
     meta_merge     => {
         resources => {
-            repository => 'http://bitbucket.org/burak/cpan-sys-info-driver-linux/',
+            repository => 'http://github.com/burak/cpan-sys-info-driver-linux/',
         },
     },
     BUILDER => {
