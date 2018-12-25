@@ -1,7 +1,7 @@
 package Sys::Info::Driver::Linux::OS;
+
 use strict;
 use warnings;
-use vars qw( $VERSION );
 use base qw( Sys::Info::Base );
 use POSIX ();
 use Cwd;
@@ -11,8 +11,6 @@ use Sys::Info::Driver::Linux::Constants qw( :all );
 use constant FSTAB_LENGTH => 6;
 
 ##no critic (InputOutput::ProhibitBacktickOperators)
-
-$VERSION = '0.70';
 
 sub init {
     my $self = shift;

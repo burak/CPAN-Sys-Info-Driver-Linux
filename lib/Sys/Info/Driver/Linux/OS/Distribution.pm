@@ -1,6 +1,8 @@
 package Sys::Info::Driver::Linux::OS::Distribution;
+
 use strict;
 use warnings;
+
 use constant STD_RELEASE     => 'lsb-release';
 use constant STD_RELEASE_DIR => 'lsb-release.d';
 use constant DEBIAN_RELEASE  => 'os-release';
@@ -12,8 +14,6 @@ use Sys::Info::Driver::Linux;
 use Sys::Info::Driver::Linux::Constants qw( :all );
 use Sys::Info::Driver::Linux::OS::Distribution::Conf;
 use File::Spec;
-
-our $VERSION = '0.73';
 
 # XXX: <REMOVE>
 my $RELX = sub {

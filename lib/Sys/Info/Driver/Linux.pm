@@ -1,11 +1,10 @@
 package Sys::Info::Driver::Linux;
+
 use strict;
 use warnings;
-use vars qw( $VERSION @ISA @EXPORT );
 use base qw( Exporter );
 
-$VERSION = '0.7903';
-@EXPORT  = qw( proc );
+our @EXPORT = qw( proc );
 
 use constant proc => { ## no critic (NamingConventions::Capitalization)
     loadavg  => '/proc/loadavg', # average cpu load

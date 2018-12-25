@@ -1,14 +1,13 @@
 package Sys::Info::Driver::Linux::OS::Distribution::Conf;
+
 use strict;
 use warnings;
-use vars qw( $VERSION @EXPORT %CONF );
 use base qw( Exporter );
 use Config::General ();
 
-$VERSION = '0.75';
-@EXPORT  = qw( %CONF );
+our @EXPORT  = qw( %CONF );
 
-%CONF = Config::General::ParseConfig( -String => <<'RAW' );
+our %CONF = Config::General::ParseConfig( -String => <<'RAW' );
 # Some parts of this data set was initially taken from Wikipedia
 
 <adamantix>

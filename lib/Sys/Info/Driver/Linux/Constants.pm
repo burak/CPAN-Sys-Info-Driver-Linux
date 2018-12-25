@@ -1,10 +1,8 @@
 package Sys::Info::Driver::Linux::Constants;
+
 use strict;
 use warnings;
-use vars qw( $VERSION @EXPORT @EXPORT_OK %EXPORT_TAGS );
 use base qw( Exporter );
-
-$VERSION = '0.7801';
 
 # uptime
 use constant UP_TIME          => 0;
@@ -41,7 +39,7 @@ use constant RE_LINUX_VERSION2 => qr{
    ([a-zA-Z0-9.]+)?
 }xmsi;
 
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
     uptime => [qw/
                     UP_TIME
                     IDLE_TIME
@@ -63,7 +61,7 @@ use constant RE_LINUX_VERSION2 => qr{
                     /],
 );
 
-@EXPORT_OK        = map { @{ $_ } } values %EXPORT_TAGS;
+our @EXPORT_OK        = map { @{ $_ } } values %EXPORT_TAGS;
 $EXPORT_TAGS{all} = \@EXPORT_OK;
 
 1;

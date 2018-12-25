@@ -1,14 +1,13 @@
 package Sys::Info::Driver::Linux::Device::CPU;
+
 use strict;
 use warnings;
-use vars qw($VERSION);
 use base qw(Sys::Info::Base);
+
 use Sys::Info::Driver::Linux;
 use Unix::Processors;
 use POSIX ();
 use Carp qw( croak );
-
-$VERSION = '0.70';
 
 sub identify {
     my $self = shift;
