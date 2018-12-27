@@ -115,7 +115,7 @@ sub node_name { return shift->uname->{nodename} }
 
 sub domain_name {
     my $self = shift;
-    # hmmmm...
+    #Â hmmmm...
     foreach my $line ( $self->read_file( proc->{resolv} ) ) {
         chomp $line;
         if ( $line =~ m{\A domain \s+ (.*) \z}xmso ) {
@@ -161,7 +161,7 @@ sub _parse_meminfo {
     foreach my $line ( split /\n/xms, $self->slurp( proc->{meminfo} ) ) {
         chomp $line;
         my($k, $v) = split /:/xms, $line;
-        # units in KB
+        #Â units in KB
         $mem{ $k } = (split /\s+/xms, $self->trim( $v ) )[0];
     }
     return %mem;
@@ -267,7 +267,7 @@ sub _fetch_user_info {
     $user{REAL_GROUP_ID}      = POSIX::getgid();  # $( guid
     $user{EFFECTIVE_GROUP_ID} = POSIX::getegid(); # $) effective guid
     my %junk;
-    # quota, comment & expire are unreliable
+    # quota, comment & expire are unreliable
     @junk{qw(name  passwd  uid  gid
              quota comment gcos dir shell expire)} = getpwnam($user{NAME});
     $user{REAL_NAME} = defined $junk{gcos}    ? $junk{gcos}    : '';
