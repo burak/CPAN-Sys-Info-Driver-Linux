@@ -1,6 +1,8 @@
 Revision history for Perl extension Sys::Info::Driver::Linux.
 
 {{$NEXT}}
+
+0.7904 2018-12-27 BURAK
     - Migrate to dzil.
 
 0.7903 Wed May  8 04:47:19 2013
