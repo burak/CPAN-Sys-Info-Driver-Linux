@@ -301,16 +301,31 @@ sub _get_file_info {
     $FH->open( $file, '<' ) || croak "Can't open $file: $!";
     my @raw = <$FH>;
     $FH->close || croak "Can't close FH($file): $!";
+    my $new_pattern =
+          $self->{pattern} =~ m{ \A DISTRIB_ID      \b }xms ? "^ID=(.+)"
+        : $self->{pattern} =~ m{ \A DISTRIB_RELEASE \b }xms ? "^PRETTY_NAME=(.+)"
+        : undef;
     my $rv;
     foreach my $line ( @raw ){
         chomp $line;
+        next if ! $line;
+
         ## no critic (RequireExtendedFormatting)
         my($info) = $line =~ m/$self->{pattern}/ms;
         if ( $info ) {
             $rv = "\L$info";
             last;
         }
+        elsif ( $new_pattern ) {
+            ## no critic (RequireExtendedFormatting)
+            my($info2) = $line =~ m/$new_pattern/ms;
+            if ( $info2 ) {
+                $rv = "\L$info2";
+                last;
+            }
+        }
     }
+
     return $rv;
 }
 
