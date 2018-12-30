@@ -302,8 +302,8 @@ sub _get_file_info {
     my @raw = <$FH>;
     $FH->close || croak "Can't close FH($file): $!";
     my $new_pattern =
-          $self->{pattern} =~ m{ \A DISTRIB_ID      \b }xms ? "^ID=(.+)"
-        : $self->{pattern} =~ m{ \A DISTRIB_RELEASE \b }xms ? "^PRETTY_NAME=(.+)"
+          $self->{pattern} =~ m{ \A DISTRIB_ID      \b }xms ? '^ID=(.+)'
+        : $self->{pattern} =~ m{ \A DISTRIB_RELEASE \b }xms ? '^PRETTY_NAME=(.+)'
         : undef;
     my $rv;
     foreach my $line ( @raw ){
@@ -324,6 +324,11 @@ sub _get_file_info {
                 last;
             }
         }
+    }
+
+    if ( $rv ) {
+        $rv =~ s{ \A ["]    }{}xms;
+        $rv =~ s{    ["] \z }{}xms;
     }
 
     return $rv;
