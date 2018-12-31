@@ -112,17 +112,33 @@ sub _probe_release {
 sub _probe_version {
     my $self    = shift;
     my $release = $self->_get_lsb_info('DISTRIB_RELEASE');
-    return $release if $release;
+    my $dist_id = $self->{DISTRIB_ID};
 
-    if ( ! $self->{DISTRIB_ID} && ! $self->name ) {
+    if ( ! $dist_id && ! $self->name ) {
+        # centos will return a string, but if couldn't detect the thing, it is
+        # better to return that instead.
+        return $release if $release;
         croak 'No version because no distribution';
     }
 
-    my $slot         = $CONF{ lc $self->{DISTRIB_ID} };
-    $self->{pattern} = exists $slot->{version_match} ? $slot->{version_match} : q{};
-    $release         = $self->_get_file_info;
-    $self->{DISTRIB_RELEASE} = $release;
-    return $release;
+    my $slot = $CONF{ lc $dist_id };
+
+    $self->{pattern} = exists $slot->{version_match}
+                        ? $slot->{version_match}
+                        : q{};
+
+    # There might be an override
+    local $self->{release_file} = $slot->{release}
+        if $slot->{release};
+
+    my $vrelease = $self->_get_file_info;
+
+    # Set to the original if we got any, othwerwise try the version
+    $self->{DISTRIB_RELEASE} = $release || $vrelease;
+
+    # Opposite of above as we want a version number
+    # if we were able locate one
+    return $vrelease || $release;
 }
 
 sub _probe_edition {
