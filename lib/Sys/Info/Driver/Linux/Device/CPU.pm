@@ -2,7 +2,7 @@ package Sys::Info::Driver::Linux::Device::CPU;
 
 use strict;
 use warnings;
-use base qw(Sys::Info::Base);
+use parent qw(Sys::Info::Base);
 
 use Sys::Info::Driver::Linux;
 use Unix::Processors;

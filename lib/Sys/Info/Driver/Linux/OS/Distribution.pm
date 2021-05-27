@@ -8,7 +8,7 @@ use constant STD_RELEASE_DIR => 'lsb-release.d';
 use constant DEBIAN_RELEASE  => 'os-release';
 use constant STD_ETC_DIR     => '/etc';
 
-use base qw( Sys::Info::Base );
+use parent qw( Sys::Info::Base );
 use Carp qw( croak );
 use Sys::Info::Driver::Linux;
 use Sys::Info::Driver::Linux::Constants qw( :all );

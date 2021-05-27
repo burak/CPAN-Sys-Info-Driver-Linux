@@ -2,7 +2,7 @@ package Sys::Info::Driver::Linux::OS::Distribution::Conf;
 
 use strict;
 use warnings;
-use base qw( Exporter );
+use parent qw( Exporter );
 use Config::General ();
 
 our @EXPORT  = qw( %CONF );

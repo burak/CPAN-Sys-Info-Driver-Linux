@@ -13,7 +13,7 @@ Sys::Info::Driver::Linux::Device - Base class for Linux device drivers
 
 =head1 SYNOPSIS
 
-    use base qw( Sys::Info::Driver::Linux::Device );
+    use parent qw( Sys::Info::Driver::Linux::Device );
 
 =head1 DESCRIPTION
 

@@ -2,7 +2,7 @@ package Sys::Info::Driver::Linux::Constants;
 
 use strict;
 use warnings;
-use base qw( Exporter );
+use parent qw( Exporter );
 
 # uptime
 use constant UP_TIME          => 0;
