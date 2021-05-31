@@ -31,8 +31,6 @@ our %CONF = Config::General::ParseConfig( -String => <<'RAW' );
 <debian>
     manufacturer  = Debian Project
     version_match = (.+)
-    release = debian_version
-    release = debian_release
     <edition>
            1.1  = buzz
            1.2  = rex
@@ -46,6 +44,9 @@ our %CONF = Config::General::ParseConfig( -String => <<'RAW' );
            5.0  = lenny
            6.0  = squeeze
            7.0  = wheezy
+           8.0  = jessie
+           9.0  = stretch
+          10.0  = buster
     </edition>
     # we get the version as "lenny/sid" for example
     <vfix>
@@ -61,6 +62,9 @@ our %CONF = Config::General::ParseConfig( -String => <<'RAW' );
         lenny   = 5.0
         squeeze = 6.0
         wheezy  = 7.0
+        jessie  = 8.0
+        stretch = 9.0
+        buster  = 10.0
     </vfix>
 </debian>
 
