@@ -127,10 +127,6 @@ sub _probe_version {
                         ? $slot->{version_match}
                         : q{};
 
-    # There might be an override
-    local $self->{release_file} = $slot->{release}
-        if $slot->{release};
-
     my $vrelease = $self->_get_file_info;
 
     # Set to the original if we got any, othwerwise try the version
