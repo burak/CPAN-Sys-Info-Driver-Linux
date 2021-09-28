@@ -20,7 +20,7 @@ our %CONF = Config::General::ParseConfig( -String => <<'RAW' );
 
 <centos>
     manufacturer  = Lance Davis
-    release       = redhat-release
+    release       = centos-release
     version_match = CentOS(?: Linux)? release (.*) \(
 </centos>
 
