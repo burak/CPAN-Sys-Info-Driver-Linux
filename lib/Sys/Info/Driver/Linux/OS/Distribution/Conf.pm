@@ -47,24 +47,28 @@ our %CONF = Config::General::ParseConfig( -String => <<'RAW' );
            8.0  = jessie
            9.0  = stretch
           10.0  = buster
+          11.0  = bullseye
+          12.0  = bookworm
     </edition>
     # we get the version as "lenny/sid" for example
     <vfix>
-        buzz    = 1.1
-        rex     = 1.2
-        bo      = 1.3
-        hamm    = 2.0
-        slink   = 2.1
-        potato  = 2.2
-        woody   = 3.0
-        sarge   = 3.1
-        etch    = 4.0
-        lenny   = 5.0
-        squeeze = 6.0
-        wheezy  = 7.0
-        jessie  = 8.0
-        stretch = 9.0
-        buster  = 10.0
+        buzz     = 1.1
+        rex      = 1.2
+        bo       = 1.3
+        hamm     = 2.0
+        slink    = 2.1
+        potato   = 2.2
+        woody    = 3.0
+        sarge    = 3.1
+        etch     = 4.0
+        lenny    = 5.0
+        squeeze  = 6.0
+        wheezy   = 7.0
+        jessie   = 8.0
+        stretch  = 9.0
+        buster   = 10.0
+        bullseye = 11.0
+        bookworm = 12.0
     </vfix>
 </debian>
 
