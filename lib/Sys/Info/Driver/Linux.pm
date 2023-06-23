@@ -15,7 +15,7 @@ use constant proc => { ## no critic (NamingConventions::Capitalization)
     swaps    => '/proc/swaps',
     fstab    => '/etc/fstab',    # for filesystem type of the current disk
     resolv   => '/etc/resolv.conf',
-    timezone => '/etc/timezone',
+    timezone => '/etc/localtime',
     issue    => '/etc/issue',
 };
 
