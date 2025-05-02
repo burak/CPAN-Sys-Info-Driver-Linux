@@ -28,8 +28,8 @@ sub edition {
 
 sub tz {
     my $self = shift;
-    return if ! -e proc->{timezone};
-    chomp( my $rv = $self->slurp( proc->{timezone} ) );
+    return if ! -l proc->{timezone};
+    chomp( my $rv = qx{readlink proc->{timezone} | sed 's|/usr/share/zoneinfo/||'} );
     return $rv;
 }
 
