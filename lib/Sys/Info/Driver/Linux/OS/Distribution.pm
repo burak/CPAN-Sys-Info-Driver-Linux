@@ -129,7 +129,10 @@ sub _probe_version {
 
     # There might be an override
     local $self->{release_file} = $slot->{release}
-        if $slot->{release};
+        if $slot->{release} && !ref($slot->{release});
+
+    local $self->{release_file} = $slot->{release}->[0]
+        if $slot->{release} && ref($slot->{release});
 
     my $vrelease = $self->_get_file_info;
 
