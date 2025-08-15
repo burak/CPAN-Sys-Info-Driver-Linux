@@ -127,9 +127,12 @@ sub _probe_version {
                         ? $slot->{version_match}
                         : q{};
 
-    # There might be an override
-    local $self->{release_file} = $slot->{release}
-        if $slot->{release};
+    my $slot_release = $slot->{release}
+        ? ref $slot->{release} eq 'ARRAY' ? $slot->{release}[0] : $slot->{release}
+        : undef
+        ;
+
+    local $self->{release_file} = $slot_release if $slot_release;
 
     my $vrelease = $self->_get_file_info;
 
