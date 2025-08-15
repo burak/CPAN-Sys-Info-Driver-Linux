@@ -173,6 +173,7 @@ our %CONF = Config::General::ParseConfig( -String => <<'RAW' );
     version_match = Red Hat (?:Enterprise )?Linux (?:Server )release (.*) \(
     release = redhat-release
     release = redhat_version
+    release = centos-release
     use_codename_for_edition = 1
 </redhat>
 
