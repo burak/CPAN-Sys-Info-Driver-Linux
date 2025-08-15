@@ -166,7 +166,22 @@ sub _probe_edition {
     my $raw_name = $self->raw_name;
     my $version  = $self->version;
     my $slot     = $CONF{$raw_name} || return;
-    my $edition  = exists $slot->{edition} ? $slot->{edition}{ $version } : undef;
+
+    my $int_version = int($version) . '.0';
+    my $edition;
+
+    if ( exists $slot->{edition} ) {
+        my $this_ve = $slot->{edition}{ $version };
+        if ( $this_ve ) {
+            $edition = $this_ve;
+        }
+        elsif ( my $this_ie = $slot->{edition}{$int_version} ) {
+            $edition = $this_ie;
+        }
+        else {
+            # warn?
+        }
+    }
 
     if ( ! $edition ) {
         if ( $version && $version !~ m{[0-9]}xms ) {
