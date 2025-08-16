@@ -7,16 +7,17 @@ use parent qw( Exporter );
 our @EXPORT = qw( proc );
 
 use constant proc => { ## no critic (NamingConventions::Capitalization)
-    loadavg  => '/proc/loadavg', # average cpu load
-    cpuinfo  => '/proc/cpuinfo', # cpu information
-    uptime   => '/proc/uptime',  # uptime file
-    version  => '/proc/version', # os version
-    meminfo  => '/proc/meminfo',
-    swaps    => '/proc/swaps',
-    fstab    => '/etc/fstab',    # for filesystem type of the current disk
-    resolv   => '/etc/resolv.conf',
-    timezone => '/etc/timezone',
-    issue    => '/etc/issue',
+    loadavg      => '/proc/loadavg', # average cpu load
+    cpuinfo      => '/proc/cpuinfo', # cpu information
+    uptime       => '/proc/uptime',  # uptime file
+    version      => '/proc/version', # os version
+    meminfo      => '/proc/meminfo',
+    swaps        => '/proc/swaps',
+    fstab        => '/etc/fstab',    # for filesystem type of the current disk
+    resolv       => '/etc/resolv.conf',
+    timezone_old => '/etc/timezone',
+    timezone     => '/etc/localtime',
+    issue        => '/etc/issue',
 };
 
 1;

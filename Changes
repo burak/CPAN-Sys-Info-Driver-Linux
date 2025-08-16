@@ -1,6 +1,9 @@
 Revision history for Perl extension Sys::Info::Driver::Linux.
 
 {{$NEXT}}
+     - Fix for timezone / !6
+
+0.7907 2025-08-16 BURAK
      - Fix for CentOS / !5
 
 0.7906 2025-08-16 BURAK

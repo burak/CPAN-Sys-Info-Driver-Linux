@@ -27,9 +27,29 @@ sub edition {
 }
 
 sub tz {
-    my $self = shift;
-    return if ! -e proc->{timezone};
-    chomp( my $rv = $self->slurp( proc->{timezone} ) );
+    my $self        = shift;
+    my $old_tz_file = proc->{timezone_old};
+    my $tz_file     = proc->{timezone};
+    my $rv;
+
+    if ( -e $tz_file ) {
+        if ( ! -l $tz_file ) {
+            die "The timezone file $tz_file is not a symbolic link!";
+        }
+        else {
+            my $name = readlink $tz_file;
+            my $junk = quotemeta '/usr/share/zoneinfo/';
+            $name =~ s{ \A $junk }{}xmsg;
+            $rv = $name;
+        }
+    }
+    elsif ( -e $old_tz_file ) {
+        $rv = chomp( my $rv = $self->slurp( $old_tz_file ) );
+    }
+    else {
+        # warn?
+    }
+
     return $rv;
 }
 
