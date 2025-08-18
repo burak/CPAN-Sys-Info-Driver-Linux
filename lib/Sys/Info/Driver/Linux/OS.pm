@@ -61,8 +61,15 @@ sub meta {
 
     my $cpu   = Sys::Info::Device->new('CPU');
     my $arch  = ($cpu->identify)[0]->{architecture};
+    my $model = ($cpu->identify)[0]->{model};
     my %mem   = $self->_parse_meminfo;
     my @swaps = $self->_parse_swap;
+
+    my $system_type = sprintf '%s based Computer%s',
+                                $arch,
+                                (  $model ? ". $model" : '' ),
+                        ;
+
     my %info;
 
     $info{manufacturer}              = $self->{OSVERSION}{MANUFACTURER};
@@ -84,8 +91,7 @@ sub meta {
 
     $info{system_manufacturer}       = undef;
     $info{system_model}              = undef;
-    $info{system_type}               = sprintf '%s based Computer', $arch;
-
+    $info{system_type}               = $system_type;
     $info{page_file_path}            = join ', ', map { $_->{Filename} } @swaps;
 
     return %info;
