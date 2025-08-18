@@ -18,6 +18,7 @@ use constant proc => { ## no critic (NamingConventions::Capitalization)
     timezone_old => '/etc/timezone',
     timezone     => '/etc/localtime',
     issue        => '/etc/issue',
+    scaling_cur_freq => '/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq',
 };
 
 1;

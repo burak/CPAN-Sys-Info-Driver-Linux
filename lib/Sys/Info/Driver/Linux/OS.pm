@@ -73,10 +73,10 @@ sub meta {
     $info{install_date}              = $self->{OSVERSION}{RAW}{BUILD_DATE};
     $info{boot_device}               = undef;
 
-    $info{physical_memory_total}     = $mem{MemTotal};
-    $info{physical_memory_available} = $mem{MemFree};
-    $info{page_file_total}           = $mem{SwapTotal};
-    $info{page_file_available}       = $mem{SwapFree};
+    $info{physical_memory_total}     = $mem{MemTotal}  * 1024;
+    $info{physical_memory_available} = $mem{MemFree}   * 1024;
+    $info{page_file_total}           = $mem{SwapTotal} * 1024;
+    $info{page_file_available}       = $mem{SwapFree}  * 1024;
 
     # windows specific
     $info{windows_dir}               = undef;
