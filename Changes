@@ -1,6 +1,9 @@
 Revision history for Perl extension Sys::Info::Driver::Linux.
 
 {{$NEXT}}
+     - Fallback to loginname if real name is unset.
+
+0.7909 2025-08-18 BURAK
      - Fix mem stats.
      - Fix CPU speed collection.
      - Fix number of cores.

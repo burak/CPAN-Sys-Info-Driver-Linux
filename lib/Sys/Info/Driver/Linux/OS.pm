@@ -132,8 +132,24 @@ sub login_name {
     my($self, @args) = @_;
     my %opt   = @args % 2 ? () : @args;
     my $login = POSIX::getlogin() || return;
-    my $rv    = eval { $opt{real} ? (getpwnam $login)[REAL_NAME_FIELD] : $login };
-    $rv =~ s{ [,]{3,} \z }{}xms if $opt{real};
+    my $rv;
+    eval {
+        if ( $opt{real} ) {
+            $rv = (getpwnam $login)[REAL_NAME_FIELD];
+            $rv =~ s{ [,]{3,} \z }{}xms;
+            if ( ! $rv ) {
+                # unset, fall back to the loginname
+                $rv = $login;
+                delete $opt{real};
+            }
+        }
+        $rv ||= $login;
+        1;
+    } or do {
+        my $eval_error = $@ || 'Zombie error';
+        warn sprintf 'Error getting login name: %s', $@;
+        $rv = $login;
+    };
     return $rv;
 }
 
