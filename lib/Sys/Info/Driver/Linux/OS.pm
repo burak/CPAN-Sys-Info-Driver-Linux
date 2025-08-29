@@ -118,14 +118,15 @@ sub build     { return shift->_populate_osversion->{OSVERSION}{RAW}{BUILD_DATE} 
 sub uptime    { return time - shift->tick_count }
 
 # user methods
+
 sub is_root {
+    my $self = shift;
     return 0 if defined &Sys::Info::EMULATE;
-    my $name = login_name();
     my $id   = POSIX::geteuid();
     my $gid  = POSIX::getegid();
     return 0 if $@;
     return 0 if ! defined $id || ! defined $gid;
-    return $id == 0 && $gid == 0 && $name eq 'root';
+    return $id == 0 && $gid == 0;
 }
 
 sub login_name {
