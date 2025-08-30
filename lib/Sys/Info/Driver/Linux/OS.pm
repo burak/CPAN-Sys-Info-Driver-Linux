@@ -372,6 +372,6 @@ Please see L<Sys::Info::OS> for definitions of these methods and more.
 
 L<Sys::Info>, L<Sys::Info::OS>,
 The C</proc> virtual filesystem:
-L<http://www.redhat.com/docs/manuals/linux/RHL-9-Manual/ref-guide/s1-proc-topfiles.html>.
+L<https://en.wikipedia.org/wiki/Procfs>.
 
 =cut
